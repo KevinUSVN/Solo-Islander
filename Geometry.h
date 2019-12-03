@@ -85,7 +85,7 @@ public:
 
 	void update(glm::mat4 C);
 	void draw(glm::mat4 c, GLuint program);
-
+	void scale(glm::vec3 scale_value);
 	void alignData();
 	void set_Materials();
 	void toggle_render();

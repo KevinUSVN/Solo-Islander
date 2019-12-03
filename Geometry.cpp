@@ -264,6 +264,7 @@ void Geometry::setUniformVariable(GLuint program)
 {
 
 	// glUniform"type"(glgetUniformLocation(shader program, ""), 1,2, pointer);
+
 	glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	//glUniform3fv(glGetUniformLocation(program, "color"), 1, glm::value_ptr(color));
 	//glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
@@ -343,6 +344,10 @@ bool Geometry::getRender()
 	return render;
 }
 
+void Geometry::scale(glm::vec3 scale_value)
+{
+	initial = glm::scale(glm::mat4(1), glm::vec3(Scale));
+}
 
 void Geometry::set_render(bool option)
 {
