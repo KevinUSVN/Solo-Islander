@@ -2,42 +2,45 @@
 
 int Window::width;
 int Window::height;
-
-Skybox* Window::skybox;
-Transform* Window::world_T_matrix;
-Transform* sphere_T;
-
-Transform* bunnyT;
-
-Geometry* light_object;
-
-Geometry* cart;
-
-vector<glm::vec3> ctrlpoints = {
-		glm::vec3(0.0, 0.0, 0.0), glm::vec3(100.0,10.0,0.0),
-		glm::vec3(115.0,-15,-10.0), glm::vec3(50.0,30.0,0.0),
-		glm::vec3(21.0, 40.0, 12), glm::vec3(30.0,150.0,120.0),
-		glm::vec3(40.0, 120.5, -40), glm::vec3(50.0,150.0,-30.7),
-		glm::vec3(-20.3, 13.3, 50.0), glm::vec3(-70.3,120, 0.2),
-		glm::vec3(-150.0, 80.0, -3.0), glm::vec3(120.0, -50.0, 3.0),
-		glm::vec3(-80.0,40.5, 80.0), glm::vec3(-50.8, -40.4,-2.2),
-		glm::vec3(-8.0,130.0,-20.0), glm::vec3(70.0, 130.0, 1.0),
-		glm::vec3(40.3,22.0,40.4), glm::vec3(-10.4, -5.0,70.0),
-		glm::vec3(-3.0,40.5,-110.0), glm::vec3(-7.0,110.0,30.3),
-		glm::vec3(-80.0,-40.0,-13.0), glm::vec3(120.0,-50.0, -70.0),
-		glm::vec3(30.0, 50.5, -110.0), glm::vec3(30.5, -10.0, 1.0),
-		glm::vec3(0.0,0.0,0.0)
-};
-
-
-Node* Window::currentNode;
-Plane* pl[6];
-
 const char* Window::windowTitle = "GLFW Starter Project";
 
-std::vector<Node*> Window::deleteTracker;
+/*
+	Initialize drawing node here
+*/
+Node* Window::currentNode;
 
+/*
+	Initialize environmental object here
+*/
+Skybox* Window::skybox;
 glm::vec3 Window::lightPos;
+
+
+/*
+	Initialize all the Transformation here
+*/
+
+Transform* Window::world_T_matrix;
+Transform* sphere_T;
+Transform* bunnyT;
+
+/*
+	Initialize all the scene object here
+*/
+Geometry* light_object;
+Geometry* cart;
+
+
+/*
+	Initialize all the player object here
+*/
+
+
+
+
+/*
+	Initialize all the shader program variable here
+*/
 GLuint Window::normal_color_program;
 GLuint Window::program;
 GLuint Window::default_program;
@@ -47,25 +50,10 @@ GLuint Window::line_program;
 GLuint Window::point_program;
 GLuint Window::handle_program;
 
-// Objects to display.
-glm::vec3 Window::last_mouse_pos;
-glm::vec3 Window::current_mouse_pos;
 
-glm::mat4 Window::projection; // Projection matrix.
-
-glm::vec3 Window::Cam_target(0, 0, -1);
-glm::vec3 Window::Cam_Pos(0, 0, 700); // Camera position.
-glm::vec3 Window::Cam_Dir = glm::normalize(Cam_Pos + Cam_target);// The point we are looking at.
-glm::vec3 Window::right = glm::normalize(glm::cross(Cam_target, glm::vec3(0.0f, 1.0f, 0.0f)));
-glm::vec3 Window::up = glm::normalize(glm::cross(right, Cam_target)); // The up direction of the camera.
-
-
-vector<glm::vec3> center_points;
-
-// View matrix, defined by eye, center and up.
-glm::mat4 Window::view = glm::lookAt(Window::Cam_Pos, Window::Cam_Dir, Window::up);
-
-// The shader program id.
+/*
+	Initialize all the boolean statement here
+*/
 bool boundary_on = false;
 bool rotate_press = false;
 bool normal_on = false;
@@ -83,9 +71,28 @@ bool physic_mode = false;
 bool pause = false;
 int Point_index = 0;
 
-glm::vec3 prev_translate_point = glm::vec3(0.0f, 0.0f, 0.0f);
+/*
+	Initialize all the time variable here
+*/
 float last_time = 0.0f;
 float current_time = 0.0f;
+
+
+
+/*
+	Initialize all the camera variable here
+*/
+glm::vec3 Window::last_mouse_pos;
+glm::vec3 Window::current_mouse_pos;
+
+glm::mat4 Window::projection; // Projection matrix.
+
+glm::vec3 Window::Cam_target(0, 0, -1);
+glm::vec3 Window::Cam_Pos(0, 0, 700); // Camera position.
+glm::vec3 Window::Cam_Dir = glm::normalize(Cam_Pos + Cam_target);// The point we are looking at.
+glm::vec3 Window::right = glm::normalize(glm::cross(Cam_target, glm::vec3(0.0f, 1.0f, 0.0f)));
+glm::vec3 Window::up = glm::normalize(glm::cross(right, Cam_target)); // The up direction of the camera.
+glm::mat4 Window::view = glm::lookAt(Window::Cam_Pos, Window::Cam_Dir, Window::up);
 float angle = 0.0f;
 float animation_dir = 1.0f;;
 float animation_counter = 0.0f;
@@ -93,15 +100,17 @@ double fov = 45;
 double old_fov = 45;
 double new_fov = 120;
 double frustum_fov = fov;
+GLfloat sensitivity = 0.05;
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 GLfloat Camera_Speed_C = 150.0f;
 GLfloat lastX = Window::width / 2.0f, lastY = Window::height / 2.0f;
-GLfloat sensitivity = 0.05f;
-GLfloat rest_of_dist;
 double yaw = -90.0, pitch = 0.0;
-GLfloat const_speed = 100.0f;
-GLfloat overlap_dist = 0.0f;
+
+/*
+	Initialize all the frustum variable here
+*/
+Plane* pl[6];
 glm::vec3 fc;
 glm::vec3 ftr;
 glm::vec3 ftl;
@@ -113,16 +122,22 @@ glm::vec3 ntr;
 glm::vec3 nbl;
 glm::vec3 nbr;
 
-
+/*
+	Initialize destructor here
+*/
+std::vector<Node*> Window::deleteTracker;
+/*
+	Initialize all shader programs in this function.
+*/
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
-	default_program = LoadShaders("shaders/shader.vert", "shaders/shader.frag");
-	normal_color_program = LoadShaders("shaders/shader_normal.vert", "shaders/shader_normal.frag");
-	skybox_program = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
-	texture_program = LoadShaders("shaders/cubemaps.vert", "shaders/cubemaps.frag");
-	line_program = LoadShaders("shaders/line_shader.vert", "shaders/line_shader.frag");
-	point_program = LoadShaders("shaders/point_shader.vert", "shaders/point_shader.frag");
-	handle_program = LoadShaders("shaders/handle_shader.vert", "shaders/handle_shader.frag");
+	default_program = LoadShaders("../shaders/shader.vert", "../shaders/shader.frag");
+	normal_color_program = LoadShaders("../shaders/shader_normal.vert", "../shaders/shader_normal.frag");
+	skybox_program = LoadShaders("../shaders/skybox.vert", "../shaders/skybox.frag");
+	texture_program = LoadShaders("../shaders/cubemaps.vert", "../shaders/cubemaps.frag");
+	line_program = LoadShaders("../shaders/line_shader.vert", "../shaders/line_shader.frag");
+	point_program = LoadShaders("../shaders/point_shader.vert", "../shaders/point_shader.frag");
+	handle_program = LoadShaders("../shaders/handle_shader.vert", "../shaders/handle_shader.frag");
 	// Check the shader program.
 	if (!default_program)
 	{
@@ -141,20 +156,54 @@ bool Window::initializeProgram() {
 
 	return true;
 }
-
+/*
+	Initialize all objects in this function.
+*/
 bool Window::initializeObjects()
 {
-	world_T_matrix = new Transform(glm::mat4(1));
-	sphere_T = new Transform(glm::mat4(1));
+	//Environment object
 	skybox = new Skybox();
-	cart = new Geometry("sphere.obj", 1);
-	currentNode = world_T_matrix;
-	world_T_matrix->addChild(sphere_T);
-	sphere_T->addChild(cart);
 
+	//Scenic Object
+	cart = new Geometry("../OBJ_files/sphere.obj", 1);
+
+	//Player Object
 	return true;
 }
+/*
+	Initialize all transformation in this function.
+*/
+bool Window::initializeTransforms() {
+	//global transform
+	world_T_matrix = new Transform(glm::mat4(1));
+	sphere_T = new Transform(glm::mat4(1));
+	world_T_matrix->addChild(sphere_T);
+	sphere_T->addChild(cart);
+	//Object transform
 
+
+	//Player Transform
+
+
+	//Environment transform
+	currentNode = world_T_matrix;
+	return true;
+}
+/*
+	Apply any transform tree structure here.
+*/
+bool Window::applyTransforms() {
+	//Global
+	world_T_matrix->addChild(sphere_T);
+
+	//Environmental
+
+	//Scenic
+	sphere_T->addChild(cart);
+
+	//Player
+	return true;
+}
 
 void Window::cleanUp()
 {

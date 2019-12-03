@@ -54,6 +54,8 @@ public:
 
 	static bool initializeProgram();
 	static bool initializeObjects();
+	static bool initializeTransforms();
+	static bool applyTransforms();
 	static void cleanUp();
 	static GLFWwindow* createWindow(int width, int height);
 

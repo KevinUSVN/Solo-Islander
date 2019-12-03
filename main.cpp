@@ -61,6 +61,10 @@ int main(void)
 	if (!Window::initializeProgram()) exit(EXIT_FAILURE);
 	// Initialize objects/pointers for rendering; exit if initialization fails.
 	if (!Window::initializeObjects()) exit(EXIT_FAILURE);
+	// Initialize transformation for object transformation; exit if initialization fails.
+	if (!Window::initializeTransforms()) exit(EXIT_FAILURE);
+
+	if (!Window::applyTransforms()) exit(EXIT_FAILURE);
 
 	// Loop while GLFW window should stay open.
 	while (!glfwWindowShouldClose(window))
