@@ -346,7 +346,7 @@ bool Geometry::getRender()
 
 void Geometry::scale(glm::vec3 scale_value)
 {
-	initial = glm::scale(glm::mat4(1), glm::vec3(Scale));
+	initial = glm::scale(glm::mat4(1), glm::vec3(scale_value));
 }
 
 void Geometry::set_render(bool option)
