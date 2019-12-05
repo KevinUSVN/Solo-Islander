@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -20,6 +21,7 @@
 #include "Node.h"
 #include "Geometry.h"
 #include "Node.h"
+#include "physic.h"
 #include "Plane.h"
 #include "Skybox.h"
 #include <GL/glut.h>
@@ -33,7 +35,7 @@ public:
 
 	static glm::mat4 projection;
 	static glm::mat4 view;
-	static glm::vec3 Cam_Pos, Cam_Dir, up, Cam_target, right;
+	static glm::vec3 Cam_Pos, Cam_Dir, up, Cam_target, right, Prev_Cam_Pos;
 
 	static glm::vec3 last_mouse_pos;
 	static glm::vec3 current_mouse_pos;

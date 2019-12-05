@@ -103,6 +103,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="physic.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="physic.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />

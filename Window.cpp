@@ -3,6 +3,10 @@
 int Window::width;
 int Window::height;
 const char* Window::windowTitle = "GLFW Starter Project";
+/*
+	Declare any enum here.
+*/
+enum PLAYER { body = 0, left_hand = 1, right_hand = 2, head = 3 };
 
 /*
 	Initialize drawing node here
@@ -14,28 +18,34 @@ Node* Window::currentNode;
 */
 Skybox* Window::skybox;
 glm::vec3 Window::lightPos;
-
+Geometry* testing_ground;
 
 /*
 	Initialize all the Transformation here
 */
-
+glm::vec3 playermovement = glm::vec3(0.0f, 0.0f, 0.0f);
 Transform* Window::world_T_matrix;
-Transform* sphere_T;
 Transform* bunnyT;
+Transform* player_T;
+Transform* player_right_hand_T;
+Transform* player_left_hand_T;
+vector<Transform*> player_bounding_box_T(4);
+Transform* testing_ground_T;
+Transform* world_physic_T;
 
 /*
 	Initialize all the scene object here
 */
 Geometry* light_object;
-Geometry* cart;
 
 
 /*
 	Initialize all the player object here
 */
-
-
+vector<Geometry*> player_bounding_box(4);
+Geometry* player;
+Geometry* Player_right_hand;
+Geometry* Player_left_hand;
 
 
 /*
@@ -64,7 +74,7 @@ bool mode_two = false;
 bool mode_three = false;
 bool mode_four = false;
 bool move_camera = true;
-bool change_control_point = false;
+bool change_control_point = false; 
 bool firstMouse;
 bool cart_mode = false;
 bool physic_mode = false;
@@ -88,7 +98,8 @@ glm::vec3 Window::current_mouse_pos;
 glm::mat4 Window::projection; // Projection matrix.
 
 glm::vec3 Window::Cam_target(0, 0, -1);
-glm::vec3 Window::Cam_Pos(0, 0, 700); // Camera position.
+glm::vec3 Window::Cam_Pos(0, 0, 2.0f); // Camera position.
+glm::vec3 Window::Prev_Cam_Pos(0, 0, 0.0f);
 glm::vec3 Window::Cam_Dir = glm::normalize(Cam_Pos + Cam_target);// The point we are looking at.
 glm::vec3 Window::right = glm::normalize(glm::cross(Cam_target, glm::vec3(0.0f, 1.0f, 0.0f)));
 glm::vec3 Window::up = glm::normalize(glm::cross(right, Cam_target)); // The up direction of the camera.
@@ -103,10 +114,11 @@ double frustum_fov = fov;
 GLfloat sensitivity = 0.05;
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
-GLfloat Camera_Speed_C = 150.0f;
+GLfloat Camera_Speed_C = 75.0f;
 GLfloat lastX = Window::width / 2.0f, lastY = Window::height / 2.0f;
 double yaw = -90.0, pitch = 0.0;
-
+glm::vec3 gravity_force = glm::vec3(0.0f, -10.0f, 0.0f);
+Physic* gravity = new Physic(current_time, gravity_force, glm::vec3(0.0f,0.0f,0.0f), glm::vec3(0.0f,0.0f,2.0f));
 /*
 	Initialize all the frustum variable here
 */
@@ -163,11 +175,20 @@ bool Window::initializeObjects()
 {
 	//Environment object
 	skybox = new Skybox();
-
+	testing_ground = new Geometry("../OBJ_files/testing_ground.obj",1);
+	testing_ground->scale(glm::vec3(1000.0f, 1000.0f, 1000.0f));
 	//Scenic Object
-	cart = new Geometry("../OBJ_files/sphere.obj", 1);
 
 	//Player Object
+	player_bounding_box[PLAYER::body] = new Geometry("../OBJ_files/square.obj",1);
+	player_bounding_box[PLAYER::left_hand] = new Geometry("../OBJ_files/square.obj", 1);
+	player_bounding_box[PLAYER::right_hand] = new Geometry("../OBJ_files/square.obj", 1);
+	player_bounding_box[PLAYER::head] = new Geometry("../OBJ_files/square.obj", 1);
+	player = new Geometry("../OBJ_files/square.obj",1);
+	Player_right_hand = new Geometry("../OBJ_files/RiggedHandRight.obj",1);
+	Player_left_hand = new Geometry("../OBJ_files/RiggedHandLeft.obj",1);
+
+
 	return true;
 }
 /*
@@ -176,15 +197,21 @@ bool Window::initializeObjects()
 bool Window::initializeTransforms() {
 	//global transform
 	world_T_matrix = new Transform(glm::mat4(1));
-	sphere_T = new Transform(glm::mat4(1));
-	world_T_matrix->addChild(sphere_T);
-	sphere_T->addChild(cart);
+	testing_ground_T = new Transform(glm::translate(glm::vec3(-500.0, -20.0f, -500.0f)));
+	world_physic_T = new Transform(glm::mat4(1));
+	//Initialize physic
+
 	//Object transform
 
 
 	//Player Transform
-
-
+	player_T = new Transform(glm::mat4(1));
+	player_right_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(-1.0f, 0.0f, -2.0f)));
+	player_left_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(1.0f, 0.0f, -2.0f)));
+	player_bounding_box_T[PLAYER::body] = new Transform(glm::mat4(1));
+	player_bounding_box_T[PLAYER::left_hand] = new Transform(glm::translate(glm::vec3(-2.0, 0.0f, -2.0f)));
+	player_bounding_box_T[PLAYER::right_hand] = new Transform(glm::translate(glm::vec3(2.0, 0.0f, -2.0f)));
+	player_bounding_box_T[PLAYER::head] = new Transform(glm::translate(glm::vec3(0, 4.0f, 0.0f)));
 	//Environment transform
 	currentNode = world_T_matrix;
 	return true;
@@ -194,14 +221,32 @@ bool Window::initializeTransforms() {
 */
 bool Window::applyTransforms() {
 	//Global
-	world_T_matrix->addChild(sphere_T);
+	world_physic_T->addChild(player_T);
+	world_T_matrix->addChild(testing_ground_T);
 
 	//Environmental
+	testing_ground_T->addChild(testing_ground);
 
 	//Scenic
-	sphere_T->addChild(cart);
 
 	//Player
+	player_T->addChild(player);
+	player_T->addChild(player_right_hand_T);
+	player_T->addChild(player_left_hand_T);
+	player_T->addChild(player_bounding_box_T[PLAYER::body]);
+	player_T->addChild(player_bounding_box_T[PLAYER::left_hand]);
+	player_T->addChild(player_bounding_box_T[PLAYER::right_hand]);
+	player_T->addChild(player_bounding_box_T[PLAYER::head]);
+	player_right_hand_T->addChild(Player_right_hand);
+	player_left_hand_T->addChild(Player_left_hand);
+	player_bounding_box_T[PLAYER::body]->addChild(player_bounding_box[PLAYER::body]);
+	player_bounding_box_T[PLAYER::left_hand]->addChild(player_bounding_box[PLAYER::left_hand]);
+	player_bounding_box_T[PLAYER::right_hand]->addChild(player_bounding_box[PLAYER::right_hand]);
+	player_bounding_box_T[PLAYER::head]->addChild(player_bounding_box[PLAYER::head]);
+	player_bounding_box_T[PLAYER::body]->set_render(false);
+	player_bounding_box_T[PLAYER::left_hand]->set_render(false);
+	player_bounding_box_T[PLAYER::right_hand]->set_render(false);
+	player_bounding_box_T[PLAYER::head]->set_render(false);
 	return true;
 }
 
@@ -297,7 +342,8 @@ void Window::idleCallback()
 
 void Window::displayCallback(GLFWwindow* window)
 {
-	// Clear the color and depth buffers.
+	GLfloat new_time =  glfwGetTime();
+	Cam_Pos = glm::vec3(Cam_Pos.x,gravity->calculate_new_Pos(new_time).y, Cam_Pos.z);
 	projection = glm::perspective(glm::radians(fov), double(width) / (double)height, 1.0, 1400.0);
 	view = glm::lookAt(Window::Cam_Pos, Window::Cam_Pos + Window::Cam_target, Window::up);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -309,6 +355,7 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(texture_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(glGetUniformLocation(texture_program, "cameraPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	//Draw the skybox
+	player_T->draw(glm::inverse(view), texture_program);
 
 	glUseProgram(skybox_program);
 	//View matrix got changed.
@@ -317,7 +364,6 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(skybox_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(skybox_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	skybox->drawSkybox();
-
 
 
 	//Draw the lines
@@ -538,22 +584,31 @@ void Window::processInput(GLFWwindow* window)
 	if (move_camera == true) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			if (move_camera) {
+				Prev_Cam_Pos = playermovement;
 				Cam_Pos += Camera_Speed * Cam_target;
+     //			playermovement -= Camera_Speed * Cam_target;
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 			if (move_camera) {
+				Prev_Cam_Pos = playermovement;
 				Cam_Pos -= Camera_Speed * Cam_target;
+	//			playermovement += Camera_Speed * Cam_target;
+
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 			if (move_camera) {
+				Prev_Cam_Pos = playermovement;
 				Cam_Pos -= glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
+//				playermovement += glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 			if (move_camera) {
+				Prev_Cam_Pos = playermovement;
 				Cam_Pos += glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
+//				playermovement -= glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
 			}
 		}
 	}
