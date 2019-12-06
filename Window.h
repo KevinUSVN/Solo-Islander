@@ -23,6 +23,7 @@
 #include "Node.h"
 #include "physic.h"
 #include "Plane.h"
+#include "Terrain.h"
 #include "Skybox.h"
 #include <GL/glut.h>
 
@@ -40,7 +41,7 @@ public:
 	static glm::vec3 last_mouse_pos;
 	static glm::vec3 current_mouse_pos;
 	static GLuint program, default_program, normal_color_program, skybox_program, texture_program,
-		line_program, point_program, handle_program;
+		line_program, point_program, handle_program, terrain_program;
 
 	static Transform* world_T_matrix;
 	static Geometry* obj;

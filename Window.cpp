@@ -17,8 +17,8 @@ Node* Window::currentNode;
 	Initialize environmental object here
 */
 Skybox* Window::skybox;
-glm::vec3 Window::lightPos;
-Geometry* testing_ground;
+glm::vec3 Window::lightPos = glm::vec3(0.0f,100.0f,0.0f);
+Terrain* terrain;
 
 /*
 	Initialize all the Transformation here
@@ -59,6 +59,7 @@ GLuint Window::texture_program;
 GLuint Window::line_program;
 GLuint Window::point_program;
 GLuint Window::handle_program;
+GLuint Window::terrain_program;
 
 
 /*
@@ -150,6 +151,7 @@ bool Window::initializeProgram() {
 	line_program = LoadShaders("../shaders/line_shader.vert", "../shaders/line_shader.frag");
 	point_program = LoadShaders("../shaders/point_shader.vert", "../shaders/point_shader.frag");
 	handle_program = LoadShaders("../shaders/handle_shader.vert", "../shaders/handle_shader.frag");
+	terrain_program = LoadShaders("../shaders/shader_terrain.vert", "../shaders/shader_terrain.frag");
 	// Check the shader program.
 	if (!default_program)
 	{
@@ -175,8 +177,7 @@ bool Window::initializeObjects()
 {
 	//Environment object
 	skybox = new Skybox();
-	testing_ground = new Geometry("../OBJ_files/testing_ground.obj",1);
-	testing_ground->scale(glm::vec3(1000.0f, 1000.0f, 1000.0f));
+	terrain = new Terrain(terrain_program);
 	//Scenic Object
 
 	//Player Object
@@ -197,7 +198,6 @@ bool Window::initializeObjects()
 bool Window::initializeTransforms() {
 	//global transform
 	world_T_matrix = new Transform(glm::mat4(1));
-	testing_ground_T = new Transform(glm::translate(glm::vec3(-500.0, -20.0f, -500.0f)));
 	world_physic_T = new Transform(glm::mat4(1));
 	//Initialize physic
 
@@ -222,10 +222,8 @@ bool Window::initializeTransforms() {
 bool Window::applyTransforms() {
 	//Global
 	world_physic_T->addChild(player_T);
-	world_T_matrix->addChild(testing_ground_T);
 
 	//Environmental
-	testing_ground_T->addChild(testing_ground);
 
 	//Scenic
 
@@ -343,11 +341,22 @@ void Window::idleCallback()
 void Window::displayCallback(GLFWwindow* window)
 {
 	GLfloat new_time =  glfwGetTime();
-	Cam_Pos = glm::vec3(Cam_Pos.x,gravity->calculate_new_Pos(new_time).y, Cam_Pos.z);
+	gravity->detect_terrain_height(terrain->getVertex(), Cam_Pos);
+	Cam_Pos = glm::vec3(Cam_Pos.x,gravity->calculate_new_Pos(new_time).y, Cam_Pos.z); //Player Position
 	projection = glm::perspective(glm::radians(fov), double(width) / (double)height, 1.0, 1400.0);
 	view = glm::lookAt(Window::Cam_Pos, Window::Cam_Pos + Window::Cam_target, Window::up);
+	
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//Draw The sphere
+	glUseProgram(terrain_program);
+
+	glUniformMatrix4fv(glGetUniformLocation(terrain_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniform3f(glGetUniformLocation(terrain_program, "viewPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
+	glUniform3f(glGetUniformLocation(terrain_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+	terrain->draw();
+
 	glUseProgram(texture_program);
 	glUniform1i(glGetUniformLocation(texture_program, "skybox"), 0);
 	currentNode->draw(glm::mat4(1), texture_program);

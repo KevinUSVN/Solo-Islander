@@ -18,8 +18,6 @@
 #include <memory>
 #include <GL/glut.h>
 
-using namespace std;
-
 
 class Physic
 {
@@ -39,6 +37,8 @@ public:
 	void setAcceleration(glm::vec3 acceleration);
 	void setVelocity(glm::vec3 veolocity);
 	void setPosition(glm::vec3 position);
+
+	GLfloat detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ, glm::vec3 Cam_Pos);
 };
 
 

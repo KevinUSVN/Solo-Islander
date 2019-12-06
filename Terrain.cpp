@@ -318,3 +318,8 @@ GLuint Terrain::loadTextures(std::vector<std::string> list_textures)
 	//Return the textureID, we need to keep track of this texture variable.
 	return textureID_1;
 }
+
+std::vector<std::vector<glm::vec3>> Terrain::getVertex()
+{
+	return this->square_location;
+}

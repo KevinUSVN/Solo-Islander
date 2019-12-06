@@ -107,6 +107,7 @@
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -118,6 +119,7 @@
     <ClInclude Include="Plane.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

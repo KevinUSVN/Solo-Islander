@@ -29,7 +29,7 @@ private:
 	glm::mat4 model;
 
 	float max_displacement = 0.01f;
-	int terrain_size = 500;
+	int terrain_size = 1000;
 	int vertex_count = 128;
 
 	float range = 4.0f;
@@ -47,6 +47,7 @@ public:
 	void draw();
 	void update();
 	void setupTextures();
+	std::vector<std::vector<glm::vec3>> getVertex();
 	GLuint loadTextures(std::vector<std::string> list_textures);
 };
 

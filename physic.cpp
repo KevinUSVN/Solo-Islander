@@ -39,10 +39,23 @@ void Physic::setVelocity(glm::vec3 velocity)
 
 void Physic::setPosition(glm::vec3 position)
 {
-	if (position.y <= 0.0f) {
-		this->position = glm::vec3(position.x, 0.0f, position.y);
+	if (position.y <= 10.0f) {
+		this->position = glm::vec3(position.x, 10.0f, position.y);
 	}
 	else {
 		this->position = position;
 	}
+}
+
+GLfloat Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ, glm::vec3 Cam_Pos)
+{
+	GLfloat x = Cam_Pos.x;
+	GLfloat z = Cam_Pos.z;
+	
+	GLint x_to_map = x / (1000.0f / 128.0f);
+	GLint z_to_map = z / (1000.0f / 128.0f);
+	GLint vertices_Location = (128 * z_to_map) + x_to_map;
+	std::cout << vertices_Location << std::endl;
+
+	return 1;
 }
