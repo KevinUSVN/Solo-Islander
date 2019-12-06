@@ -41,6 +41,7 @@ void Physic::setPosition(glm::vec3 position)
 {
 	if (position.y <= terrain_height) {
 		this->position = glm::vec3(position.x, terrain_height, position.z);
+		std::cout << "Cam_Pos y : " << this->position.y << std::endl; 
 	}
 	else {
 		this->position = position;
@@ -54,11 +55,14 @@ void Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ
 	GLfloat scale_diff = 1000.0f / 128.0f;
 	GLint x_to_map = x / (scale_diff);
 	GLint z_to_map = z / (scale_diff);
-	GLint vertices_Location = (128 * z_to_map) + x_to_map;
+	GLint vertices_Location = (127 * z_to_map) + x_to_map;
 	std::vector<glm::vec3> getSquare = terrainXZ[vertices_Location];
 	GLfloat new_X = scale_diff - Cam_Pos.z;
+	std::cout << getSquare[0].y << " " << getSquare[1].y << " " << getSquare[2].y << " " << getSquare[3].y << std::endl;
 	if (Cam_Pos.x >= (new_X)) {
-		this->terrain_height = barryCentric(getSquare[0], getSquare[1], getSquare[2], Cam_Pos, scale_diff);
+
+		this->terrain_height = barryCentric(getSquare[1], getSquare[0], getSquare[2], Cam_Pos, scale_diff);
+		
 	}
 	else if (Cam_Pos.x < new_X)
 	{
@@ -69,9 +73,11 @@ void Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ
 
 GLfloat Physic::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 Pos, GLfloat scale_diff)
 {
-	GLfloat det = (p2.z - p3.z) * (p1.x - p3.x) + ((p3.x - p2.x) * (p1.z - p3.z));
-	GLfloat l1 = ((p2.z - p3.z) * (Pos.x - p3.x) + (p3.x - p2.x) * (Pos.y - p3.z)) / det;
-	GLfloat l2 = ((p3.z - p1.z) * (Pos.x - p3.x) + (p1.x - p3.x) * (Pos.y - p3.z)) / det;
+	GLfloat det = ((p2.z - p3.z) * (p1.x - p3.x)) + ((p3.x - p2.x) * (p1.z - p3.z));
+	GLfloat l1 = (((p2.z - p3.z) * (Pos.x - p3.x)) + ((p3.x - p2.x) * (Pos.z - p3.z))) / det;
+	GLfloat l2 = (((p3.z - p1.z) * (Pos.x - p3.x)) + ((p1.x - p3.x) * (Pos.z - p3.z))) / det;
 	GLfloat l3 = scale_diff - l1 - l2;
-	return (l1 * p1.y) + (l2 * p2.y) + (l3 * p3.y);
+//	std::cout << l1 << " " << l2 << " " << l3 << std::endl;
+	return ((l1 * p1.y) + (l2 * p2.y) + (l3 * p3.y))/ scale_diff;
+
 }

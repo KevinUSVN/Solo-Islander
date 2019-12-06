@@ -342,7 +342,7 @@ void Window::displayCallback(GLFWwindow* window)
 {
 	GLfloat new_time =  glfwGetTime();
 	gravity->detect_terrain_height(terrain->getVertex(), Cam_Pos);
-	Cam_Pos = glm::vec3(Cam_Pos.x,gravity->calculate_new_Pos(new_time).y, Cam_Pos.z); //Player Position
+	Cam_Pos = glm::vec3(Cam_Pos.x,gravity->calculate_new_Pos(new_time).y+6.0f, Cam_Pos.z); //Player Position
 	projection = glm::perspective(glm::radians(fov), double(width) / (double)height, 1.0, 1400.0);
 	view = glm::lookAt(Window::Cam_Pos, Window::Cam_Pos + Window::Cam_target, Window::up);
 	
