@@ -144,14 +144,14 @@ std::vector<Node*> Window::deleteTracker;
 */
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
-	default_program = LoadShaders("../shaders/shader.vert", "../shaders/shader.frag");
-	normal_color_program = LoadShaders("../shaders/shader_normal.vert", "../shaders/shader_normal.frag");
-	skybox_program = LoadShaders("../shaders/skybox.vert", "../shaders/skybox.frag");
-	texture_program = LoadShaders("../shaders/cubemaps.vert", "../shaders/cubemaps.frag");
-	line_program = LoadShaders("../shaders/line_shader.vert", "../shaders/line_shader.frag");
-	point_program = LoadShaders("../shaders/point_shader.vert", "../shaders/point_shader.frag");
-	handle_program = LoadShaders("../shaders/handle_shader.vert", "../shaders/handle_shader.frag");
-	terrain_program = LoadShaders("../shaders/shader_terrain.vert", "../shaders/shader_terrain.frag");
+	default_program = LoadShaders("shaders/shader.vert", "shaders/shader.frag");
+	normal_color_program = LoadShaders("shaders/shader_normal.vert", "shaders/shader_normal.frag");
+	skybox_program = LoadShaders("shaders/skybox.vert", "shaders/skybox.frag");
+	texture_program = LoadShaders("shaders/cubemaps.vert", "shaders/cubemaps.frag");
+	line_program = LoadShaders("shaders/line_shader.vert", "shaders/line_shader.frag");
+	point_program = LoadShaders("shaders/point_shader.vert", "shaders/point_shader.frag");
+	handle_program = LoadShaders("shaders/handle_shader.vert", "shaders/handle_shader.frag");
+	terrain_program = LoadShaders("shaders/shader_terrain.vert", "shaders/shader_terrain.frag");
 	// Check the shader program.
 	if (!default_program)
 	{
@@ -181,13 +181,13 @@ bool Window::initializeObjects()
 	//Scenic Object
 
 	//Player Object
-	player_bounding_box[PLAYER::body] = new Geometry("../OBJ_files/square.obj",1);
-	player_bounding_box[PLAYER::left_hand] = new Geometry("../OBJ_files/square.obj", 1);
-	player_bounding_box[PLAYER::right_hand] = new Geometry("../OBJ_files/square.obj", 1);
-	player_bounding_box[PLAYER::head] = new Geometry("../OBJ_files/square.obj", 1);
-	player = new Geometry("../OBJ_files/square.obj",1);
-	Player_right_hand = new Geometry("../OBJ_files/RiggedHandRight.obj",1);
-	Player_left_hand = new Geometry("../OBJ_files/RiggedHandLeft.obj",1);
+	player_bounding_box[PLAYER::body] = new Geometry("OBJ_files/square.obj",1);
+	player_bounding_box[PLAYER::left_hand] = new Geometry("OBJ_files/square.obj", 1);
+	player_bounding_box[PLAYER::right_hand] = new Geometry("OBJ_files/square.obj", 1);
+	player_bounding_box[PLAYER::head] = new Geometry("OBJ_files/square.obj", 1);
+	player = new Geometry("OBJ_files/square.obj",1);
+	Player_right_hand = new Geometry("OBJ_files/RiggedHandRight.obj",1);
+	Player_left_hand = new Geometry("OBJ_files/RiggedHandLeft.obj",1);
 
 
 	return true;
