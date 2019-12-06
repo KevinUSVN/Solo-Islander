@@ -39,23 +39,39 @@ void Physic::setVelocity(glm::vec3 velocity)
 
 void Physic::setPosition(glm::vec3 position)
 {
-	if (position.y <= 10.0f) {
-		this->position = glm::vec3(position.x, 10.0f, position.y);
+	if (position.y <= terrain_height) {
+		this->position = glm::vec3(position.x, terrain_height, position.z);
 	}
 	else {
 		this->position = position;
 	}
 }
 
-GLfloat Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ, glm::vec3 Cam_Pos)
+void Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ, glm::vec3 Cam_Pos)
 {
 	GLfloat x = Cam_Pos.x;
 	GLfloat z = Cam_Pos.z;
-	
-	GLint x_to_map = x / (1000.0f / 128.0f);
-	GLint z_to_map = z / (1000.0f / 128.0f);
+	GLfloat scale_diff = 1000.0f / 128.0f;
+	GLint x_to_map = x / (scale_diff);
+	GLint z_to_map = z / (scale_diff);
 	GLint vertices_Location = (128 * z_to_map) + x_to_map;
-	std::cout << vertices_Location << std::endl;
+	std::vector<glm::vec3> getSquare = terrainXZ[vertices_Location];
+	GLfloat new_X = scale_diff - Cam_Pos.z;
+	if (Cam_Pos.x >= (new_X)) {
+		this->terrain_height = barryCentric(getSquare[0], getSquare[1], getSquare[2], Cam_Pos, scale_diff);
+	}
+	else if (Cam_Pos.x < new_X)
+	{
+		this->terrain_height = barryCentric(getSquare[1], getSquare[3], getSquare[2], Cam_Pos, scale_diff);
+	}
+	std::cout << this->terrain_height << std::endl;
+}
 
-	return 1;
+GLfloat Physic::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 Pos, GLfloat scale_diff)
+{
+	GLfloat det = (p2.z - p3.z) * (p1.x - p3.x) + ((p3.x - p2.x) * (p1.z - p3.z));
+	GLfloat l1 = ((p2.z - p3.z) * (Pos.x - p3.x) + (p3.x - p2.x) * (Pos.y - p3.z)) / det;
+	GLfloat l2 = ((p3.z - p1.z) * (Pos.x - p3.x) + (p1.x - p3.x) * (Pos.y - p3.z)) / det;
+	GLfloat l3 = scale_diff - l1 - l2;
+	return (l1 * p1.y) + (l2 * p2.y) + (l3 * p3.y);
 }
