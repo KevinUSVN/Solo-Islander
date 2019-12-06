@@ -108,16 +108,16 @@ Skybox::Skybox()
 
 	faces =
 	{
-		"C:/Users/timmy/Desktop/CSE167/Project_4/skybox/mp_majestic/mp_majestic/majestic_rt.jpg",
-		"C:/Users/timmy/Desktop/CSE167/Project_4/skybox/mp_majestic/mp_majestic/majestic_lf.jpg",
-		"C:/Users/timmy/Desktop/CSE167/Project_4/skybox/mp_majestic/mp_majestic/majestic_up.jpg",
-		"C:/Users/timmy/Desktop/CSE167/Project_4/skybox/mp_majestic/mp_majestic/majestic_dn.jpg",
-		"C:/Users/timmy/Desktop/CSE167/Project_4/skybox/mp_majestic/mp_majestic/majestic_ft.jpg",
-		"C:/Users/timmy/Desktop/CSE167/Project_4/skybox/mp_majestic/mp_majestic/majestic_bk.jpg"
+		"skybox/mp_majestic/mp_majestic/majestic_rt.jpg",
+		"skybox/mp_majestic/mp_majestic/majestic_lf.jpg",
+		"skybox/mp_majestic/mp_majestic/majestic_up.jpg",
+		"skybox/mp_majestic/mp_majestic/majestic_dn.jpg",
+		"skybox/mp_majestic/mp_majestic/majestic_ft.jpg",
+		"skybox/mp_majestic/mp_majestic/majestic_bk.jpg"
 	};
 
 	this->cubemapTexture = loadCubemap(faces);
-	this->cubeTexture = loadTexture("C:/Users/timmy/Desktop/CSE167/Project_4/skybox/wall.jpg");
+	this->cubeTexture = loadTexture("skybox/wall.jpg");
 	//Shaders
 	//LoadShader's here.
 	glEnable(GL_CULL_FACE);
