@@ -78,6 +78,30 @@ void Terrain::initTerrain()
 			int bottomLeft = ((i + 1) * vertex_count) + j; //128//129
 			int bottomRight = bottomLeft + 1; //129//130
 
+			//Push back to indices.
+			indices.push_back(topLeft);
+			indices.push_back(bottomLeft);
+			indices.push_back(topRight);
+
+			indices.push_back(topRight);
+			indices.push_back(bottomLeft);
+			indices.push_back(bottomRight);
+		}
+	}
+
+	//Set random height using Diamond Square
+	diamondSquare(0, vertex_count - 1, 0, vertex_count - 1, level, range);
+
+	// Update heights in square_location vector
+	for (int i = 0; i < vertex_count - 1; i++)
+	{
+		for (int j = 0; j < vertex_count - 1; j++)
+		{
+			int topLeft = (i * vertex_count) + j; //0//1
+			int topRight = topLeft + 1; //1//2
+			int bottomLeft = ((i + 1) * vertex_count) + j; //128//129
+			int bottomRight = bottomLeft + 1; //129//130
+
 			//Store the vertices in a temp vector. Temp vector is the "square"
 			temp_vector.push_back(vertices[topLeft]);
 			temp_vector.push_back(vertices[topRight]);
@@ -87,21 +111,9 @@ void Terrain::initTerrain()
 			//Store each square (vector), square location contains all the "squares"
 			square_location.push_back(temp_vector);
 
-			//Push back to indices.
-			indices.push_back(topLeft);
-			indices.push_back(bottomLeft);
-			indices.push_back(topRight);
-
-			indices.push_back(topRight);
-			indices.push_back(bottomLeft);
-			indices.push_back(bottomRight);
-
 			temp_vector.clear(); //Clear temp vector for another set of vertices
 		}
 	}
-
-	//Set random height using Diamond Square
-	diamondSquare(0, vertex_count - 1, 0, vertex_count - 1, level, range);
 }
 
 /*
@@ -263,6 +275,7 @@ void Terrain::update()
 	texCoords.clear();
 	indices.clear();
 	square_location.clear();
+	temp_vector.clear();
 
 	initTerrain();
 	setBuffers();
