@@ -369,6 +369,18 @@ float Terrain::getHeightFromVertex(int x, int y)
 	return this->vertices[(y * vertex_count) + x].y;
 }
 
+/* Gets the size of the terrain (should be a power of 2) */
+int Terrain::getTerrainSize()
+{
+	return terrain_size;
+}
+
+/* Gets the vertex count of the terrain */
+int Terrain::getVertexCount()
+{
+	return vertex_count;
+}
+
 /* Updates the normals for the entire terrain. */
 void Terrain::updateNormals()
 {
