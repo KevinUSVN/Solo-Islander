@@ -45,7 +45,7 @@ void Terrain::initTerrain()
 			{
 				vertex_y = rand() % 30;
 			}
-			if (j > setGen2)
+			if (j < setGen2)
 			{
 				vertex_y = rand() % 30;
 			}
