@@ -93,6 +93,9 @@ void Terrain::initTerrain()
 	//Set random height using Diamond Square
 	diamondSquare(0, vertex_count - 1, 0, vertex_count - 1, level, range);
 
+	//Fix triangles around edges
+	fixEdges();
+
 	// Update heights in square_location vector
 	for (int i = 0; i < vertex_count - 1; i++)
 	{
@@ -383,6 +386,40 @@ void Terrain::updateNormals()
 			glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 1.0f, heightU - heightD));
 			this->normals[(i * vertex_count) + j] = normal;
 		}
+	}
+}
+
+/*
+	Fixes triangle popups around the edges of the terrain
+	Update the height values of the edges to be zero
+*/
+void Terrain::fixEdges()
+{
+	for (int i = 0; i < vertex_count; i++)
+	{
+		//Retain x-values and z-values
+		float x_axis_top = vertices[i].x;
+		float z_axis_top = vertices[i].z;
+
+		float x_axis_bottom = vertices[(vertex_count * (vertex_count - 1)) + i].x;
+		float z_axis_bottom = vertices[(vertex_count * (vertex_count - 1)) + i].z;
+
+		float x_axis_left = vertices[i * vertex_count].x;
+		float z_axis_left = vertices[i * vertex_count].z;
+
+		float x_axis_right = vertices[(i * vertex_count) + (vertex_count - 1)].x;
+		float z_axis_right = vertices[(i * vertex_count) + (vertex_count - 1)].z;
+
+		//Update the edges.
+		glm::vec3 vertex_top = glm::vec3(x_axis_top, 0.0f, z_axis_top);
+		glm::vec3 vertex_bottom = glm::vec3(x_axis_bottom, 0.0f, z_axis_bottom);
+		glm::vec3 vertex_left = glm::vec3(x_axis_left, 0.0f, z_axis_left);
+		glm::vec3 vertex_right = glm::vec3(x_axis_right, 0.0f, z_axis_right);
+
+		this->vertices[i] = vertex_top;
+		this->vertices[(vertex_count * (vertex_count - 1)) + i] = vertex_bottom;
+		this->vertices[i * vertex_count] = vertex_left;
+		this->vertices[(i * vertex_count) + (vertex_count - 1)] = vertex_right;
 	}
 }
 

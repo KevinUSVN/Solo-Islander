@@ -41,6 +41,7 @@ public:
 	void diamondSquare(int x1, int x2, int y1, int y2, int level, float range);
 	
 	void draw();
+	void fixEdges();
 	void update();
 
 	std::vector<std::vector<glm::vec3>> getVertex();
