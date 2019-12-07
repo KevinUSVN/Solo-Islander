@@ -6,10 +6,9 @@ Terrain::Terrain(GLuint program)
 	this->model = glm::mat4(1.0f);
 	shaderProgram = program;
 
-	std::cout << 1.0f / 2.0f * 4.0f << std::endl;
-
 	initTerrain();
 	setBuffers();
+	setupTextures();
 }
 
 Terrain::~Terrain()
@@ -27,24 +26,26 @@ Terrain::~Terrain()
 */
 void Terrain::initTerrain()
 {
+	//Set random number generator
+	srand((unsigned int)time(NULL));
 	//Set points (30 at y should be max height)
 	for (int i = 0; i < vertex_count; i++)
 	{
 		for (int j = 0; j < vertex_count; j++)
 		{
-			//Set random number generator
-			srand((unsigned int)time(NULL));
-
 			//Setup the vertices.
 			float vertex_x = ((float)j / ((float)vertex_count - 1)) * terrain_size;
 
 			//Setup random height values (y-axis)
 			float vertex_y = 0.0f;
-			if (i == (vertex_count / 2)) //Currently at midpoint
+			float setGen1 = rand() % vertex_count;
+			float setGen2 = rand() % vertex_count;
+
+			if (i > setGen1) //Set as midpoint for island
 			{
 				vertex_y = rand() % 30;
 			}
-			if (j == (vertex_count / 2))
+			if (j > setGen2)
 			{
 				vertex_y = rand() % 30;
 			}
@@ -114,6 +115,9 @@ void Terrain::initTerrain()
 			temp_vector.clear(); //Clear temp vector for another set of vertices
 		}
 	}
+
+	// Update normals
+	updateNormals();
 }
 
 /*
@@ -243,13 +247,10 @@ void Terrain::setBuffers()
 
 	//Bind for texture coordinates
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * texCoords.size(), texCoords.data(), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * texCoords.size(), texCoords.data(), GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(2);
-
-	//Set textures
-	this->terrainTexture = loadTextures(list_textures);
-
+	
 	// Unbind from the VBO.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -264,8 +265,125 @@ void Terrain::draw()
 
 	glBindVertexArray(vao);
 	
+	// Set active textures
+	glActiveTexture(GL_TEXTURE0); // 0 as default, water
+	glBindTexture(GL_TEXTURE_2D, this->terrainTexture1);
+	glUniform1i(glGetUniformLocation(shaderProgram, "terrain_water"), 0);
+
+	glActiveTexture(GL_TEXTURE1); // sand
+	glBindTexture(GL_TEXTURE_2D, this->terrainTexture2);
+	glUniform1i(glGetUniformLocation(shaderProgram, "terrain_sand"), 1);
+
+	glActiveTexture(GL_TEXTURE2); // grass
+	glBindTexture(GL_TEXTURE_2D, this->terrainTexture3);
+	glUniform1i(glGetUniformLocation(shaderProgram, "terrain_grass"), 2);
+
+	glActiveTexture(GL_TEXTURE3); // snow
+	glBindTexture(GL_TEXTURE_2D, this->terrainTexture4);
+	glUniform1i(glGetUniformLocation(shaderProgram, "terrain_snow"), 3);
+
+	//Add additional textures here
+	/* --- Example Case ---
+		glActiveTexture(GL_TEXTURE1);//Enable the texture.
+		glBindTexture(GL_TEXTURE_2D, this->terrainTexture_1);
+		glUniform1i(glGetUniformLocation(shaderProgram, "TerrainTexture_1"), 1);
+	*/
+
+
 	glDrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+/* Load the texture and return a texture ID. */
+GLuint Terrain::loadTexture(std::string filePath)
+{
+	//Hold the textureID (This will be the textureID to return). textureID holds the water texture.
+	GLuint textureID;
+
+	//Define variables to hold height map's width, height, pixel information.
+	int width, height, nrChannels;
+	unsigned char* data;
+
+	//Create ID for texture.
+	glGenTextures(1, &textureID);
+	glActiveTexture(GL_TEXTURE0); //Set this texture to be the active texture (0).
+
+	//Set this texture to be the one we are working with.
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//Load texture file
+	data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	//Make sure no bytes are padded:
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	//Unbind the texture cube map.
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//Return the textureID, we need to keep track of this texture variable.
+	return textureID;
+}
+
+/*
+	Loads the textures from file and obtain texture ID
+*/
+void Terrain::setupTextures()
+{
+	this->terrainTexture1 = loadTexture("textures/terrain/water.jpg");
+	this->terrainTexture2 = loadTexture("textures/terrain/sand.jpg");
+	this->terrainTexture3 = loadTexture("textures/terrain/grass.jpg");
+	this->terrainTexture4 = loadTexture("textures/terrain/snow.jpg");
+}
+
+std::vector<std::vector<glm::vec3>> Terrain::getVertex()
+{
+	return this->square_location;
+}
+
+/* Return the height at a given x, y coordinate. */
+float Terrain::getHeightFromVertex(int x, int y)
+{
+	if ((x < 0) || (x >= vertex_count) || (y < 0) || (y >= vertex_count))
+	{
+		return 0;
+	}
+	return this->vertices[(y * vertex_count) + x].y;
+}
+
+/* Updates the normals for the entire terrain. */
+void Terrain::updateNormals()
+{
+	for (int i = 0; i < vertex_count; i++)
+	{
+		for (int j = 0; j < vertex_count; j++)
+		{
+			//Get the updated heights after diamond-square modification
+			float heightL = getHeightFromVertex(j - 1, i);
+			float heightR = getHeightFromVertex(j + 1, i);
+			float heightD = getHeightFromVertex(j, i + 1);
+			float heightU = getHeightFromVertex(j, i - 1);
+
+			//Update the normal.
+			glm::vec3 normal = glm::normalize(glm::vec3(heightL - heightR, 1.0f, heightU - heightD));
+			this->normals[(i * vertex_count) + j] = normal;
+		}
+	}
 }
 
 void Terrain::update()
@@ -280,59 +398,4 @@ void Terrain::update()
 	initTerrain();
 	setBuffers();
 	draw();
-}
-
-void Terrain::setupTextures()
-{
-	this->list_textures.push_back("./textures/terrain/water_tex1.jpg");
-}
-
-/* Load the texture and return a texture ID. */
-GLuint Terrain::loadTextures(std::vector<std::string> list_textures)
-{
-	//Hold the textureID (This will be the textureID to return). textureID_1 holds the water texture.
-	GLuint textureID_1;
-
-	//Define variables to hold height map's width, height, pixel information.
-	int width, height, nrChannels;
-	unsigned char* data;
-
-	//Create ID for texture.
-	glGenTextures(1, &textureID_1);
-	glActiveTexture(GL_TEXTURE0); //Set this texture to be the active texture (0).
-
-	//Set this texture to be the one we are working with.
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID_1);
-
-	//Generate the texture.
-	/*for (GLuint i = 0; i < list_textures.size(); i++)
-	{
-		unsigned char* data = stbi_load(list_textures[i].c_str(), &width, &height, &nrChannels, 0);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	}*/
-
-	//Make sure no bytes are padded:
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	//Select GL_MODULATE to mix texture with polygon color for shading:
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	//Use bilinear interpolation:
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	//Use clamp to edge to hide skybox edges:
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); //X
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); //Y
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); //Z
-
-	//Unbind the texture cube map.
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//Return the textureID, we need to keep track of this texture variable.
-	return textureID_1;
-}
-
-std::vector<std::vector<glm::vec3>> Terrain::getVertex()
-{
-	return this->square_location;
 }

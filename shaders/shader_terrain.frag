@@ -3,7 +3,10 @@
 out vec4 FragColor;
 
 uniform samplerCube cubeMap;
-uniform sampler2D terrain_texture;
+uniform sampler2D terrain_water;
+uniform sampler2D terrain_sand;
+uniform sampler2D terrain_grass;
+uniform sampler2D terrain_snow;
  
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -15,37 +18,38 @@ in vec3 world_normal;
 //for diffuse color
 int levels = 5;
 float scaleFactor = 1.0 / levels;
-vec3 diffuseColor = vec3(0.30, 0.80, 0.10);
-vec3 color = vec3(0.90, 0.0, 0.20);
-//vec3 specular = vec3(0.30,0.80,0.10);
+vec4 diffuseColor = vec4(0.30, 0.80, 0.10, 1);
+vec4 color = vec4(0.90, 0.0, 0.20, 1);
 
 float material_shininess = 100;
 float material_kd = 0.5;
 float material_ks = 0.3;
 
-//out vec4 color;
 in vec3 pos;
-out vec2 tex;
+in vec2 tex_coords;
 
 void main()
 {
     // Set basic colors
     if (0 <= world_pos.y && world_pos.y < 1) //Water
     {
-        color = vec3(0.0, 0.5, 0.8);
-        //texture(terrain_water, tex);
+        color = vec4(0.0, 0.5, 0.8, 1);
+        //color = texture(terrain_water, tex_coords);
     }
     else if (1 <= world_pos.y && world_pos.y < 15) //Sand
     {
-        color = vec3(0.76, 0.7, 0.5);
+        color = vec4(0.76, 0.7, 0.5, 1);
+        //color = texture(terrain_sand, tex_coords);
     }
     else if (15 <= world_pos.y && world_pos.y < 100) //Grass
     {
-        color = vec3(0.4, 0.5, 0.2);
+        color = vec4(0.4, 0.5, 0.2, 1);
+        //color = texture(terrain_grass, tex_coords);
     }
     else //Snow
     {
-	    color = vec3(1.0, 1.0, 1.0);
+	    color = vec4(1.0, 1.0, 1.0, 1);
+        //color = texture(terrain_snow, tex_coords);
     }
 
     vec3 L = normalize(lightPos - world_pos);
@@ -65,12 +69,20 @@ void main()
     
     //limit specular
     float specMask = ((pow(dot(H, world_normal), material_shininess) > 0.4) && (0 <= world_pos.y && world_pos.y < 1)) ? 1 : 0;
-    
-    //float edgeDetection = (dot(V, world_normal) > 0.2) ? 1 : 0;
-    
-    //color = edgeDetection * (color + diffuseColor + specular * specMask);
+
+    // float edge = dot(normalize(V - world_pos), world_normal);
+    // edge = max(0, edge);
+
+    // if (edge < 0.001)
+    // {
+    //     color = 0.5 * color;
+    // }
     
     color = (color + diffuseColor + specular * specMask);
-    
-    FragColor = vec4(color, 1);
+
+    FragColor = color;
+
+    // To check normal colors
+    // vec3 norm = (normalize(world_normal) + 1) / 2;
+    // FragColor = vec4(norm, 1);
 }

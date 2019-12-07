@@ -19,6 +19,7 @@ Node* Window::currentNode;
 Skybox* Window::skybox;
 glm::vec3 Window::lightPos = glm::vec3(0.0f,100.0f,0.0f);
 Terrain* terrain;
+Water* water;
 
 /*
 	Initialize all the Transformation here
@@ -60,6 +61,7 @@ GLuint Window::line_program;
 GLuint Window::point_program;
 GLuint Window::handle_program;
 GLuint Window::terrain_program;
+GLuint Window::water_program;
 
 
 /*
@@ -152,6 +154,7 @@ bool Window::initializeProgram() {
 	point_program = LoadShaders("shaders/point_shader.vert", "shaders/point_shader.frag");
 	handle_program = LoadShaders("shaders/handle_shader.vert", "shaders/handle_shader.frag");
 	terrain_program = LoadShaders("shaders/shader_terrain.vert", "shaders/shader_terrain.frag");
+	water_program = LoadShaders("shaders/shader_water.vert", "shaders/shader_water.frag");
 	// Check the shader program.
 	if (!default_program)
 	{
@@ -178,6 +181,7 @@ bool Window::initializeObjects()
 	//Environment object
 	skybox = new Skybox();
 	terrain = new Terrain(terrain_program);
+	water = new Water(water_program);
 	//Scenic Object
 
 	//Player Object
@@ -348,7 +352,8 @@ void Window::displayCallback(GLFWwindow* window)
 	
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//Draw The sphere
+
+	//Draw the terrain
 	glUseProgram(terrain_program);
 
 	glUniformMatrix4fv(glGetUniformLocation(terrain_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
@@ -356,6 +361,16 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniform3f(glGetUniformLocation(terrain_program, "viewPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	glUniform3f(glGetUniformLocation(terrain_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 	terrain->draw();
+
+	//Draw the water
+	//Draw the terrain
+	glUseProgram(water_program);
+
+	glUniformMatrix4fv(glGetUniformLocation(water_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(water_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniform3f(glGetUniformLocation(water_program, "viewPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
+	glUniform3f(glGetUniformLocation(water_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+	water->draw();
 
 	glUseProgram(texture_program);
 	glUniform1i(glGetUniformLocation(texture_program, "skybox"), 0);
