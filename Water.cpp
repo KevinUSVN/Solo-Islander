@@ -114,15 +114,36 @@ void Water::setBuffers()
 
 void Water::draw()
 {
+	//Set wave speed
+	//move_factor = move_factor + (wave_speed * (abs(diff_sec) / 10000));
+	move_factor = move_factor + wave_speed;
+	
+	// Reset Wave
+	if (move_factor > 1)
+	{
+		move_factor = 0;
+	}
+
+	//std::cout << "Move factor: " << move_factor << std::endl;
+
 	// Draw terrain
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniform1f(glGetUniformLocation(shaderProgram, "moveFactor"), move_factor);
 
 	glBindVertexArray(vao);
 
 	// Set active textures
 	glActiveTexture(GL_TEXTURE0); // 0 as default, water
-	glBindTexture(GL_TEXTURE_2D, this->waterTexture1);
+	glBindTexture(GL_TEXTURE_2D, this->waterTexture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "terrain_water"), 0);
+
+	glActiveTexture(GL_TEXTURE1); // 0 as default, water
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->skyboxTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "cubeMap"), 1);
+
+	glActiveTexture(GL_TEXTURE2); // 0 as default, water
+	glBindTexture(GL_TEXTURE_2D, this->dudvMap);
+	glUniform1i(glGetUniformLocation(shaderProgram, "dudvMap"), 2);
 
 	//Add additional textures here
 	/* --- Example Case ---
@@ -157,7 +178,10 @@ std::vector<std::vector<glm::vec3>> Water::getVertex()
 
 void Water::setupTextures()
 {
-	this->waterTexture1 = loadTexture("textures/terrain/water.jpg");
+	this->waterTexture = loadTexture("textures/terrain/water.jpg");
+	this->dudvMap = loadTexture("textures/water/waterDUDV.png");
+	list_textureID.push_back(waterTexture);
+	//list_textureID.push_back(skyboxTexture);
 }
 
 GLuint Water::loadTexture(std::string filePath)
@@ -203,4 +227,9 @@ GLuint Water::loadTexture(std::string filePath)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//Return the textureID, we need to keep track of this texture variable.
 	return textureID;
+}
+
+void Water::setCubeMap(GLuint textureID)
+{
+	skyboxTexture = textureID;
 }

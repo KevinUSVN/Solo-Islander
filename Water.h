@@ -14,7 +14,9 @@ private:
 	std::vector<glm::vec2> texCoords;
 
 	std::vector<std::string> list_textures;
-	GLuint waterTexture1;
+	GLuint waterTexture, skyboxTexture, dudvMap;
+
+	std::vector<GLuint> list_textureID;
 
 	std::vector<unsigned int> indices;
 	std::vector<std::vector<glm::vec3>> square_location;
@@ -29,6 +31,11 @@ private:
 	int plane_size = 2000;
 	int vertex_count = 128;
 
+	float wave_speed = 0.00001f;
+	float move_factor = 0.0f;
+
+	float start_time;
+
 public:
 	Water(GLuint program);
 	~Water();
@@ -42,6 +49,7 @@ public:
 
 	void setupTextures();
 	GLuint loadTexture(std::string filePath);
+	void setCubeMap(GLuint textureID);
 };
 
 #endif

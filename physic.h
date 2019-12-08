@@ -29,6 +29,9 @@ private:
 	glm::vec3 position;
 	bool collision_detected;
 	GLfloat terrain_height;
+
+	GLfloat terrain_size;
+	GLfloat vertex_count;
 public:
 	Physic();
 	Physic(GLfloat time_before_a_stop, glm::vec3 acceleration, glm::vec3 init_Vel, glm::vec3 init_Pos);
@@ -41,6 +44,9 @@ public:
 
 	void detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ, glm::vec3 Cam_Pos);
 	GLfloat barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 Pos, GLfloat scale_diff);
+
+	void setTerrainSize(float terrainSize);
+	void setVertexCount(float vertexCount);
 };
 
 

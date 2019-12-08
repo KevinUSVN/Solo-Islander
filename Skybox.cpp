@@ -227,3 +227,8 @@ void Skybox::drawSkybox()
 	glBindVertexArray(0);
 
 }
+
+GLuint Skybox::getCubeMap()
+{
+	return this->cubemapTexture;
+}

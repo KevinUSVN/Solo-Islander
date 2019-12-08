@@ -49,6 +49,8 @@ public:
 	unsigned int loadCubemap(std::vector<std::string> faces);
 	void drawSkybox();
 
+	GLuint getCubeMap();
+
 };
 
 

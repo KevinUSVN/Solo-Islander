@@ -25,8 +25,8 @@ private:
 	glm::mat4 model;
 
 	float max_displacement = 0.01f;
-	int terrain_size = 1024;
-	int vertex_count = 128;
+	GLfloat terrain_size = 1024;
+	GLfloat vertex_count = 128;
 
 	float range = 4.0f;
 	int level = (int)glm::pow(2, 16.0f);
@@ -46,8 +46,8 @@ public:
 
 	std::vector<std::vector<glm::vec3>> getVertex();
 	float getHeightFromVertex(int x, int y);
-	int getTerrainSize();
-	int getVertexCount();
+	GLfloat getTerrainSize();
+	GLfloat getVertexCount();
 	void updateNormals();
 
 	GLuint loadTexture(std::string filePath);

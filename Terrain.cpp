@@ -6,7 +6,7 @@ Terrain::Terrain(GLuint program)
 	this->model = glm::mat4(1.0f);
 	shaderProgram = program;
 
-	initTerrain();
+	initTerrain(); // Creates a terrain using diamond square
 	setBuffers();
 	setupTextures();
 }
@@ -38,8 +38,8 @@ void Terrain::initTerrain()
 
 			//Setup random height values (y-axis)
 			float vertex_y = 0.0f;
-			float setGen1 = rand() % vertex_count;
-			float setGen2 = rand() % vertex_count;
+			int setGen1 = rand() % (int)vertex_count;
+			int setGen2 = rand() % (int)vertex_count;
 
 			if (i > setGen1) //Set as midpoint for island
 			{
@@ -370,13 +370,13 @@ float Terrain::getHeightFromVertex(int x, int y)
 }
 
 /* Gets the size of the terrain (should be a power of 2) */
-int Terrain::getTerrainSize()
+GLfloat Terrain::getTerrainSize()
 {
 	return terrain_size;
 }
 
 /* Gets the vertex count of the terrain */
-int Terrain::getVertexCount()
+GLfloat Terrain::getVertexCount()
 {
 	return vertex_count;
 }

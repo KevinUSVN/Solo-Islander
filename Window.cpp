@@ -182,6 +182,14 @@ bool Window::initializeObjects()
 	skybox = new Skybox();
 	terrain = new Terrain(terrain_program);
 	water = new Water(water_program);
+
+	//Send cubeMap data to Water class
+	water->setCubeMap(skybox->getCubeMap());
+
+	//Send terrain size and vertex count data to Physic class
+	gravity->setTerrainSize(terrain->getTerrainSize());
+	gravity->setVertexCount(terrain->getVertexCount());
+
 	//Scenic Object
 
 	//Player Object

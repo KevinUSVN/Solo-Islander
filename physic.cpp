@@ -41,7 +41,7 @@ void Physic::setPosition(glm::vec3 position)
 {
 	if (position.y <= terrain_height) {
 		this->position = glm::vec3(position.x, terrain_height, position.z);
-		std::cout << "Cam_Pos y : " << this->position.y << std::endl; 
+		//std::cout << "Cam_Pos y : " << this->position.y << std::endl; 
 	}
 	else {
 		this->position = position;
@@ -52,13 +52,13 @@ void Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ
 {
 	GLfloat x = Cam_Pos.x;
 	GLfloat z = Cam_Pos.z;
-	GLfloat scale_diff = 1000.0f / 128.0f;
+	GLfloat scale_diff = terrain_size / vertex_count;
 	GLint x_to_map = x / (scale_diff);
 	GLint z_to_map = z / (scale_diff);
 	GLint vertices_Location = (127 * z_to_map) + x_to_map;
 	std::vector<glm::vec3> getSquare = terrainXZ[vertices_Location];
 	GLfloat new_X = scale_diff - Cam_Pos.z;
-	std::cout << getSquare[0].y << " " << getSquare[1].y << " " << getSquare[2].y << " " << getSquare[3].y << std::endl;
+	//std::cout << getSquare[0].y << " " << getSquare[1].y << " " << getSquare[2].y << " " << getSquare[3].y << std::endl;
 	if (Cam_Pos.x >= (new_X)) {
 
 		this->terrain_height = barryCentric(getSquare[1], getSquare[0], getSquare[2], Cam_Pos, scale_diff);
@@ -68,7 +68,7 @@ void Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ
 	{
 		this->terrain_height = barryCentric(getSquare[1], getSquare[3], getSquare[2], Cam_Pos, scale_diff);
 	}
-	std::cout << this->terrain_height << std::endl;
+	//std::cout << this->terrain_height << std::endl;
 }
 
 GLfloat Physic::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 Pos, GLfloat scale_diff)
@@ -80,4 +80,16 @@ GLfloat Physic::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3
 //	std::cout << l1 << " " << l2 << " " << l3 << std::endl;
 	return ((l1 * p1.y) + (l2 * p2.y) + (l3 * p3.y))/ scale_diff;
 
+}
+
+void Physic::setTerrainSize(GLfloat terrainSize)
+{
+	this->terrain_size = terrainSize;
+	//std::cout << terrain_size << std::endl;
+}
+
+void Physic::setVertexCount(GLfloat vertexCount)
+{
+	this->vertex_count = vertexCount;
+	//std::cout << vertex_count << std::endl;
 }
