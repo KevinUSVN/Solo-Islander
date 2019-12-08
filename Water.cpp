@@ -117,12 +117,6 @@ void Water::draw()
 	//Set wave speed
 	//move_factor = move_factor + (wave_speed * (abs(diff_sec) / 10000));
 	move_factor = move_factor + wave_speed;
-	
-	// Reset Wave
-	if (move_factor > 1)
-	{
-		move_factor = 0;
-	}
 
 	//std::cout << "Move factor: " << move_factor << std::endl;
 
