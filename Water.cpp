@@ -7,7 +7,12 @@ Water::Water(GLuint program)
 	this->shaderProgram = program;
 
 	initWater();
-	setBuffers();
+	setBuffers(); //To draw water plane
+
+	//Get reflection and refraction textures
+	setReflectionFrameBuffer();
+	setRefractionFrameBuffer();
+
 	setupTextures();
 }
 
@@ -112,6 +117,9 @@ void Water::setBuffers()
 	glBindVertexArray(0);
 }
 
+/*
+	Render the water
+*/
 void Water::draw()
 {
 	//Set wave speed
@@ -139,13 +147,20 @@ void Water::draw()
 	glBindTexture(GL_TEXTURE_2D, this->dudvMap);
 	glUniform1i(glGetUniformLocation(shaderProgram, "dudvMap"), 2);
 
+	glActiveTexture(GL_TEXTURE3); // 0 as default, water
+	glBindTexture(GL_TEXTURE_2D, this->reflectionTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "reflectionTexture"), 3);
+
+	glActiveTexture(GL_TEXTURE4); // 0 as default, water
+	glBindTexture(GL_TEXTURE_2D, this->refractionTexture);
+	glUniform1i(glGetUniformLocation(shaderProgram, "refractionTexture"), 4);
+
 	//Add additional textures here
 	/* --- Example Case ---
 		glActiveTexture(GL_TEXTURE1);//Enable the texture.
 		glBindTexture(GL_TEXTURE_2D, this->terrainTexture_1);
 		glUniform1i(glGetUniformLocation(shaderProgram, "TerrainTexture_1"), 1);
 	*/
-
 
 	glDrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -174,8 +189,6 @@ void Water::setupTextures()
 {
 	this->waterTexture = loadTexture("textures/terrain/water.jpg");
 	this->dudvMap = loadTexture("textures/water/waterDUDV.png");
-	list_textureID.push_back(waterTexture);
-	//list_textureID.push_back(skyboxTexture);
 }
 
 GLuint Water::loadTexture(std::string filePath)
@@ -226,4 +239,135 @@ GLuint Water::loadTexture(std::string filePath)
 void Water::setCubeMap(GLuint textureID)
 {
 	skyboxTexture = textureID;
+}
+
+/*
+	Create Frame Buffer Object for reflection
+*/
+void Water::setReflectionFrameBuffer()
+{
+	/*
+		Creating FBO for reflection
+	*/
+	glGenFramebuffers(1, &this->reflection_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->reflection_fbo);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	/*
+		Color attachment reflection texture
+	*/
+	glGenTextures(1, &this->reflectionTexture);
+	glBindTexture(GL_TEXTURE_2D, this->reflectionTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, reflection_width, reflection_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTexture, 0);
+
+	/*
+		Reflection Depth Buffer
+	*/
+	glGenRenderbuffers(1, &reflection_dbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, reflection_dbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, reflection_width, reflection_height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflection_dbo);
+	//glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	//	std::cerr << "Water::initFrameBuffers - Failed to create reflection frame buffer" << std::endl;
+
+	//Unbind all
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/*
+	Create Frame Buffer Object for refraction
+*/
+void Water::setRefractionFrameBuffer()
+{
+	/*
+		Creating FBO for refraction
+	*/
+	glGenFramebuffers(1, &this->refraction_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->refraction_fbo);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	/*
+		Color attachment refraction texture
+	*/
+	glGenTextures(1, &this->refractionTexture);
+	glBindTexture(GL_TEXTURE_2D, this->refractionTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, refraction_width, refraction_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTexture, 0);
+
+	/*
+		Refraction Depth Texture
+	*/
+	glGenTextures(1, &this->refractionDepthTexture);
+	glBindTexture(GL_TEXTURE_2D, this->refractionDepthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, refraction_width, refraction_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, refractionDepthTexture, 0);
+
+	//Unbind all
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/*
+	Send render data to reflectionBFO
+*/
+void Water::bindReflectionFrameBuffer()
+{
+	bindFrameBuffer(reflection_fbo, reflection_width, reflection_height);
+}
+
+/*
+	Send render data to refractionFBO
+*/
+void Water::bindRefractionFrameBuffer()
+{
+	bindFrameBuffer(refraction_fbo, refraction_width, refraction_height);
+}
+
+void Water::bindFrameBuffer(GLuint FBO, float width, float height)
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	glViewport(0, 0, width, height);
+}
+
+/*
+	Render back to default frame buffer object
+*/
+void Water::unbindCurrentFrameBuffer(int width, int height)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width, height);
+}
+
+
+GLuint Water::getReflectionTexture()
+{
+	return this->reflectionTexture;
+}
+
+GLuint Water::getRefractionTexture()
+{
+	return this->refractionTexture;
+}
+
+GLuint Water::getReflectionFBO()
+{
+	return this->reflection_fbo;
+}
+
+float Water::getReflectionWidth()
+{
+	return this->reflection_width;
+}
+
+float Water::getReflectionHeight()
+{
+	return this->reflection_height;
 }
