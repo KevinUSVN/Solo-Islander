@@ -24,81 +24,85 @@ void Geometry::draw(glm::mat4 c, GLuint program)
 
 Geometry::Geometry(std::string objFilename, GLuint select)
 {
-	std::ifstream objFile(objFilename); // The obj file we are reading.
-	// Check whether the file can be opened.
-	if (objFile.is_open())
-	{
-		std::string line; // A line in the file.
+	if (objFilename.substr(objFilename.find_last_of(".") + 1) == "obj") {
+		std::ifstream objFile(objFilename); // The obj file we are reading.
+		// Check whether the file can be opened.
 
-		// Read lines from the file.
-		while (std::getline(objFile, line))
+		if (objFile.is_open())
 		{
-			// Turn the line into a string stream for processing.
-			std::stringstream ss;
-			ss << line;
+			std::string line; // A line in the file.
 
-			// Read the first word of the line.
-			std::string label;
-			ss >> label;
-
-			// If the line is about vertex (starting with a "v").
-			if (label == "v")
+			// Read lines from the file.
+			while (std::getline(objFile, line))
 			{
-				// Read the later three float numbers and use them as the 
-				// coordinates.
-				glm::vec3 point;
-				ss >> point.x >> point.y >> point.z;
+				// Turn the line into a string stream for processing.
+				std::stringstream ss;
+				ss << line;
 
-				// Process the point. For example, you can save it to a.
-				vertices.push_back(point);
-			}
-			else if (label == "vn")
-			{
-				glm::vec3 normal;
-				ss >> normal.x >> normal.y >> normal.z;
-				normals.push_back(normal);
-			}
-			//Gathered first value, ignored rest (May change later)
-			else if (label == "f")
-			{
-				std::string field1, field2, field3;
-				unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+				// Read the first word of the line.
+				std::string label;
+				ss >> label;
 
-				//field 1: vertex, uv, normal
-				ss >> field1 >> field2 >> field3;
+				// If the line is about vertex (starting with a "v").
+				if (label == "v")
+				{
+					// Read the later three float numbers and use them as the 
+					// coordinates.
+					glm::vec3 point;
+					ss >> point.x >> point.y >> point.z;
 
-				std::replace(field1.begin(), field1.end(), '/', ' ');
-				std::stringstream temp_ss1(field1);
-				temp_ss1 >> vertexIndex[0];// >> uvIndex[0] >> normalIndex[0];
+					// Process the point. For example, you can save it to a.
+					vertices.push_back(point);
+				}
+				else if (label == "vn")
+				{
+					glm::vec3 normal;
+					ss >> normal.x >> normal.y >> normal.z;
+					normals.push_back(normal);
+				}
+				//Gathered first value, ignored rest (May change later)
+				else if (label == "f")
+				{
+					std::string field1, field2, field3;
+					unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 
-				std::replace(field2.begin(), field2.end(), '/', ' ');
-				std::stringstream temp_ss2(field2);
-				temp_ss2 >> vertexIndex[1] >> uvIndex[1] >> normalIndex[1];
+					//field 1: vertex, uv, normal
+					ss >> field1 >> field2 >> field3;
 
-				std::replace(field3.begin(), field3.end(), '/', ' ');
-				std::stringstream temp_ss3(field3);
-				temp_ss3 >> vertexIndex[2] >> uvIndex[2] >> normalIndex[2];
+					std::replace(field1.begin(), field1.end(), '/', ' ');
+					std::stringstream temp_ss1(field1);
+					temp_ss1 >> vertexIndex[0];// >> uvIndex[0] >> normalIndex[0];
 
-				//std::cout << normalIndex[0] << std::endl;
+					std::replace(field2.begin(), field2.end(), '/', ' ');
+					std::stringstream temp_ss2(field2);
+					temp_ss2 >> vertexIndex[1] >> uvIndex[1] >> normalIndex[1];
 
-				vertexIndices.push_back(vertexIndex[0] - 1);
-				vertexIndices.push_back(vertexIndex[1] - 1);
-				vertexIndices.push_back(vertexIndex[2] - 1);
-				uvIndices.push_back(uvIndex[0] - 1);
-				uvIndices.push_back(uvIndex[1] - 1);
-				uvIndices.push_back(uvIndex[2] - 1);
-				normalIndices.push_back(normalIndex[0] - 1);
-				normalIndices.push_back(normalIndex[1] - 1);
-				normalIndices.push_back(normalIndex[2] - 1);
+					std::replace(field3.begin(), field3.end(), '/', ' ');
+					std::stringstream temp_ss3(field3);
+					temp_ss3 >> vertexIndex[2] >> uvIndex[2] >> normalIndex[2];
+
+					//std::cout << normalIndex[0] << std::endl;
+
+					vertexIndices.push_back(vertexIndex[0] - 1);
+					vertexIndices.push_back(vertexIndex[1] - 1);
+					vertexIndices.push_back(vertexIndex[2] - 1);
+					uvIndices.push_back(uvIndex[0] - 1);
+					uvIndices.push_back(uvIndex[1] - 1);
+					uvIndices.push_back(uvIndex[2] - 1);
+					normalIndices.push_back(normalIndex[0] - 1);
+					normalIndices.push_back(normalIndex[1] - 1);
+					normalIndices.push_back(normalIndex[2] - 1);
+				}
 			}
 		}
-	}
-	else
-	{
-		std::cerr << "Can't open the file " << objFilename << std::endl;
+		else
+		{
+			std::cerr << "Can't open the file " << objFilename << std::endl;
+		}
+
+		objFile.close();
 	}
 
-	objFile.close();
 	/*
 	 * TODO: Section 4, you will need to normalize the object to fit in the
 	 * screen.
@@ -155,6 +159,23 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 	GLfloat midX = minX + abs((maxX - minX) / 2);
 	GLfloat midY = minY + abs((maxY - minY) / 2);
 	GLfloat midZ = minZ + abs((maxZ - minZ) / 2);
+
+	max_x = maxX;
+	min_x = minX;
+	max_y = maxY;
+	min_y = minY;
+	max_z = maxZ;
+	min_z = minZ;
+	bounding_variables->push_back(glm::vec3(min_x, max_y, min_z));
+	bounding_variables->push_back(glm::vec3(max_x, max_y, min_z));
+	bounding_variables->push_back(glm::vec3(min_x, min_y, min_z));
+	bounding_variables->push_back(glm::vec3(max_x, min_y, min_z));
+	bounding_variables->push_back(glm::vec3(min_x, max_y, max_z));
+	bounding_variables->push_back(glm::vec3(max_x, max_y, max_z));
+	bounding_variables->push_back(glm::vec3(min_x, min_y, max_z));
+	bounding_variables->push_back(glm::vec3(max_x, min_y, max_z));
+
+
 	centerx = midX;
 	centery = midY;
 	centerz = midZ;
@@ -357,4 +378,37 @@ void Geometry::set_render(bool option)
 GLfloat Geometry::getMaxDistance()
 {
 	return maxDistance;
+}
+
+GLfloat Geometry::getMax_x()
+{
+	return max_x;
+}
+
+GLfloat Geometry::getMax_y()
+{
+	return max_y;
+
+}
+
+GLfloat Geometry::getMax_z()
+{
+	return max_z;
+
+}
+
+GLfloat Geometry::getMin_x()
+{
+	return min_x;
+
+}
+
+GLfloat Geometry::getMin_y()
+{
+	return min_y;
+}
+
+GLfloat Geometry::getMin_z()
+{
+	return min_z;
 }

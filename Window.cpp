@@ -30,20 +30,18 @@ Transform* bunnyT;
 Transform* player_T;
 Transform* player_right_hand_T;
 Transform* player_left_hand_T;
-vector<Transform*> player_bounding_box_T(4);
 Transform* testing_ground_T;
 Transform* world_physic_T;
-
+Transform* beach_hut_T;
 /*
 	Initialize all the scene object here
 */
 Geometry* light_object;
-
+Shape_Program* beach_hut;
 
 /*
 	Initialize all the player object here
 */
-vector<Geometry*> player_bounding_box(4);
 Geometry* player;
 Geometry* Player_right_hand;
 Geometry* Player_left_hand;
@@ -191,12 +189,8 @@ bool Window::initializeObjects()
 	gravity->setVertexCount(terrain->getVertexCount());
 
 	//Scenic Object
-
+	beach_hut = new Shape_Program("OBJ_files/testing.txt", beach_hut_T);
 	//Player Object
-	player_bounding_box[PLAYER::body] = new Geometry("OBJ_files/square.obj",1);
-	player_bounding_box[PLAYER::left_hand] = new Geometry("OBJ_files/square.obj", 1);
-	player_bounding_box[PLAYER::right_hand] = new Geometry("OBJ_files/square.obj", 1);
-	player_bounding_box[PLAYER::head] = new Geometry("OBJ_files/square.obj", 1);
 	player = new Geometry("OBJ_files/square.obj",1);
 	Player_right_hand = new Geometry("OBJ_files/RiggedHandRight.obj",1);
 	Player_left_hand = new Geometry("OBJ_files/RiggedHandLeft.obj",1);
@@ -214,16 +208,12 @@ bool Window::initializeTransforms() {
 	//Initialize physic
 
 	//Object transform
-
+	beach_hut_T = new Transform(glm::mat4(1));
 
 	//Player Transform
 	player_T = new Transform(glm::mat4(1));
 	player_right_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(-1.0f, 0.0f, -2.0f)));
 	player_left_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(1.0f, 0.0f, -2.0f)));
-	player_bounding_box_T[PLAYER::body] = new Transform(glm::mat4(1));
-	player_bounding_box_T[PLAYER::left_hand] = new Transform(glm::translate(glm::vec3(-2.0, 0.0f, -2.0f)));
-	player_bounding_box_T[PLAYER::right_hand] = new Transform(glm::translate(glm::vec3(2.0, 0.0f, -2.0f)));
-	player_bounding_box_T[PLAYER::head] = new Transform(glm::translate(glm::vec3(0, 4.0f, 0.0f)));
 	//Environment transform
 	currentNode = world_T_matrix;
 	return true;
@@ -243,20 +233,10 @@ bool Window::applyTransforms() {
 	player_T->addChild(player);
 	player_T->addChild(player_right_hand_T);
 	player_T->addChild(player_left_hand_T);
-	player_T->addChild(player_bounding_box_T[PLAYER::body]);
-	player_T->addChild(player_bounding_box_T[PLAYER::left_hand]);
-	player_T->addChild(player_bounding_box_T[PLAYER::right_hand]);
-	player_T->addChild(player_bounding_box_T[PLAYER::head]);
+
 	player_right_hand_T->addChild(Player_right_hand);
 	player_left_hand_T->addChild(Player_left_hand);
-	player_bounding_box_T[PLAYER::body]->addChild(player_bounding_box[PLAYER::body]);
-	player_bounding_box_T[PLAYER::left_hand]->addChild(player_bounding_box[PLAYER::left_hand]);
-	player_bounding_box_T[PLAYER::right_hand]->addChild(player_bounding_box[PLAYER::right_hand]);
-	player_bounding_box_T[PLAYER::head]->addChild(player_bounding_box[PLAYER::head]);
-	player_bounding_box_T[PLAYER::body]->set_render(false);
-	player_bounding_box_T[PLAYER::left_hand]->set_render(false);
-	player_bounding_box_T[PLAYER::right_hand]->set_render(false);
-	player_bounding_box_T[PLAYER::head]->set_render(false);
+
 	return true;
 }
 
@@ -369,7 +349,6 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniform3f(glGetUniformLocation(terrain_program, "viewPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	glUniform3f(glGetUniformLocation(terrain_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 	terrain->draw();
-
 	//Draw the water
 	//Draw the terrain
 	glUseProgram(water_program);
@@ -387,6 +366,7 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(texture_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(glGetUniformLocation(texture_program, "cameraPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	//Draw the skybox
+	beach_hut->draw(glm::mat4(1), texture_program);
 	player_T->draw(glm::inverse(view), texture_program);
 
 	glUseProgram(skybox_program);
@@ -618,6 +598,14 @@ void Window::processInput(GLFWwindow* window)
 			if (move_camera) {
 				Prev_Cam_Pos = playermovement;
 				Cam_Pos += Camera_Speed * Cam_target;
+				if (Cam_Pos.x < 0.0f)
+				{
+					Cam_Pos.x = 0;
+				}
+				if (Cam_Pos.z < 0.0f)
+				{
+					Cam_Pos.z = 0;
+				}
      //			playermovement -= Camera_Speed * Cam_target;
 			}
 		}
@@ -625,6 +613,14 @@ void Window::processInput(GLFWwindow* window)
 			if (move_camera) {
 				Prev_Cam_Pos = playermovement;
 				Cam_Pos -= Camera_Speed * Cam_target;
+				if (Cam_Pos.x < 0.0f)
+				{
+					Cam_Pos.x = 0;
+				}
+				if (Cam_Pos.z < 0.0f)
+				{
+					Cam_Pos.z = 0;
+				}
 	//			playermovement += Camera_Speed * Cam_target;
 
 			}
@@ -633,6 +629,14 @@ void Window::processInput(GLFWwindow* window)
 			if (move_camera) {
 				Prev_Cam_Pos = playermovement;
 				Cam_Pos -= glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
+				if (Cam_Pos.x < 0.0f)
+				{
+					Cam_Pos.x = 0;
+				}
+				if (Cam_Pos.z < 0.0f)
+				{
+					Cam_Pos.z = 0;
+				}
 //				playermovement += glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
 			}
 		}
@@ -640,6 +644,14 @@ void Window::processInput(GLFWwindow* window)
 			if (move_camera) {
 				Prev_Cam_Pos = playermovement;
 				Cam_Pos += glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
+				if (Cam_Pos.x < 0.0f)
+				{
+					Cam_Pos.x = 0;
+				}
+				if (Cam_Pos.z < 0.0f)
+				{
+					Cam_Pos.z = 0;
+				}
 //				playermovement -= glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
 			}
 		}

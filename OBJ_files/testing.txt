@@ -1,0 +1,11 @@
+file start
+A OBJ_files/square.obj
+B OBJ_files/sphere.obj
+C OBJ_files/testing_ground.obj
+file end
+
+rule start
+/ A 1.0,1.0,1.0,1.0 -> B 0.0,2.0,0.0,1.0 -> C 0.0,0.0,0.0,10.0
+- B 0.0,0.0,0.0,1.0
+- C 0.0,0.0,0.0,1.0
+rule end

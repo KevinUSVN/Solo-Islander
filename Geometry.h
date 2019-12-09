@@ -27,6 +27,8 @@
 
 using namespace std;
 
+enum BOUNDING_BOX { TLN = 0, TRN = 1, BLN = 2, BRN = 3, TLF = 4, TRF = 5, BLF = 6, BRF = 7 };
+
 class Geometry : public Node
 {
 private:
@@ -53,6 +55,8 @@ private:
 	GLfloat new_centerx, new_centery, new_centerz;
 	GLfloat pointSize;
 	GLfloat maxDistance;
+	GLfloat max_x, min_x, max_y, min_y, max_z, min_z;
+	std::vector<glm::vec3> bounding_variables[8];
 
 	GLuint mat_select;
 	glm::mat4 view, projection;
@@ -79,6 +83,12 @@ private:
 	glm::vec3 viewPos;
 	glm::vec3 center;
 
+	//Procedural object.
+	std::vector<Geometry*> next_object;
+	//Write parser for txt file.
+	//Write parser for procedurally generated shapes.
+	//Write file for arbitary shapes.
+
 public:
 	Geometry(std::string objFilename, GLuint mat_select);
 	~Geometry();
@@ -95,6 +105,14 @@ public:
 	glm::mat4 get_model();
 	bool getRender();
 	GLfloat getMaxDistance();
+	GLfloat getMax_x();
+	GLfloat getMax_y();
+	GLfloat getMax_z();
+	GLfloat getMin_x();
+	GLfloat getMin_y();
+	GLfloat getMin_z();
+
+
 };
 
 

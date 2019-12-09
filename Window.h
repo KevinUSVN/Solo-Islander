@@ -20,6 +20,7 @@
 #include "Transform.h"
 #include "Node.h"
 #include "Geometry.h"
+#include "Shape_Program.h"
 #include "Node.h"
 #include "physic.h"
 #include "Plane.h"
