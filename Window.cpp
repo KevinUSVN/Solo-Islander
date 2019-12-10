@@ -60,6 +60,7 @@ GLuint Window::point_program;
 GLuint Window::handle_program;
 GLuint Window::terrain_program;
 GLuint Window::water_program;
+GLuint Window::toon_program;
 
 
 /*
@@ -81,13 +82,16 @@ bool cart_mode = false;
 bool physic_mode = false;
 bool pause = false;
 int Point_index = 0;
+bool alternator_true = true;
+bool alternator_false = true;
 
 /*
 	Initialize all the time variable here
 */
 float last_time = 0.0f;
 float current_time = 0.0f;
-
+GLfloat currentSoundTime = 0.0f;
+GLfloat soundInterval = 200.0f; // Define sound delay, lower = faster, higher = slower
 
 
 /*
@@ -99,7 +103,7 @@ glm::vec3 Window::current_mouse_pos;
 glm::mat4 Window::projection; // Projection matrix.
 
 glm::vec3 Window::Cam_target(0, 0, -1);
-glm::vec3 Window::Cam_Pos(0, 0, 2.0f); // Camera position.
+glm::vec3 Window::Cam_Pos(500.0f, 0, 500.0f); // Camera position.
 glm::vec3 Window::Prev_Cam_Pos(0, 0, 0.0f);
 glm::vec3 Window::Cam_Dir = glm::normalize(Cam_Pos + Cam_target);// The point we are looking at.
 glm::vec3 Window::right = glm::normalize(glm::cross(Cam_target, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -139,6 +143,15 @@ glm::vec3 nbr;
 	Initialize destructor here
 */
 std::vector<Node*> Window::deleteTracker;
+
+
+/*
+	Initialize Audio (WARNING: DEBUG MODE will make sounds delay more longer, use release for accurate playback)
+*/
+irrklang::ISoundEngine* soundObject;
+irrklang::ISoundEngine* ambientObject;
+irrklang::ISoundEngine* ambient3DObject;
+
 /*
 	Initialize all shader programs in this function.
 */
@@ -153,6 +166,7 @@ bool Window::initializeProgram() {
 	handle_program = LoadShaders("shaders/handle_shader.vert", "shaders/handle_shader.frag");
 	terrain_program = LoadShaders("shaders/shader_terrain.vert", "shaders/shader_terrain.frag");
 	water_program = LoadShaders("shaders/shader_water.vert", "shaders/shader_water.frag");
+	toon_program = LoadShaders("shaders/shader_toon.vert", "shaders/shader_toon.frag");
 	// Check the shader program.
 	if (!default_program)
 	{
@@ -195,6 +209,18 @@ bool Window::initializeObjects()
 	Player_right_hand = new Geometry("OBJ_files/RiggedHandRight.obj",1);
 	Player_left_hand = new Geometry("OBJ_files/RiggedHandLeft.obj",1);
 
+	//Audio Object
+	soundObject = irrklang::createIrrKlangDevice();
+	ambientObject = irrklang::createIrrKlangDevice();
+	ambient3DObject = irrklang::createIrrKlangDevice();
+
+	//Play Background Sounds
+	ambientObject->play2D("audio/beach_ambience.wav", GL_TRUE);
+	ambientObject->setSoundVolume(0.3f);
+
+	//Play Environmental Sounds (3D)
+	//ambient3DObject->play3D("audio/water_fountain.wav", irrklang::vec3df(0.0f, 0.0f, 0.0f), GL_TRUE);
+	//ambient3DObject->setSoundVolume(0.3f);
 
 	return true;
 }
@@ -327,7 +353,7 @@ void Window::resizeCallback(GLFWwindow* window, int width, int height)
 
 void Window::idleCallback()
 {
-
+	currentSoundTime--;
 }
 
 void Window::displayCallback(GLFWwindow* window)
@@ -359,15 +385,15 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniform3f(glGetUniformLocation(water_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 	water->draw();
 
-	glUseProgram(texture_program);
-	glUniform1i(glGetUniformLocation(texture_program, "skybox"), 0);
-	currentNode->draw(glm::mat4(1), texture_program);
-	glUniformMatrix4fv(glGetUniformLocation(texture_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(texture_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glUniform3f(glGetUniformLocation(texture_program, "cameraPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
+	glUseProgram(toon_program);
+	glUniform1i(glGetUniformLocation(toon_program, "skybox"), 0);
+	currentNode->draw(glm::mat4(1), toon_program);
+	glUniformMatrix4fv(glGetUniformLocation(toon_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(toon_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniform3f(glGetUniformLocation(toon_program, "cameraPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	//Draw the skybox
-	beach_hut->draw(glm::mat4(1), texture_program);
-	player_T->draw(glm::inverse(view), texture_program);
+	beach_hut->draw(glm::mat4(1), toon_program);
+	player_T->draw(glm::inverse(view), toon_program);
 
 	glUseProgram(skybox_program);
 	//View matrix got changed.
@@ -462,6 +488,8 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 			}
 			break;
 		case GLFW_KEY_R:
+			soundObject->play2D("audio/chop.wav", GL_FALSE);
+			terrain->update();
 			break;
 		default:
 			break;
@@ -593,6 +621,7 @@ void Window::processInput(GLFWwindow* window)
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	GLfloat Camera_Speed = Camera_Speed_C * deltaTime;
+
 	if (move_camera == true) {
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			if (move_camera) {
@@ -607,6 +636,12 @@ void Window::processInput(GLFWwindow* window)
 					Cam_Pos.z = 0;
 				}
      //			playermovement -= Camera_Speed * Cam_target;
+
+				if (currentSoundTime < 0)
+				{
+					soundObject->play2D("audio/grass_walk1.wav", GL_FALSE);
+					currentSoundTime = soundInterval;
+				}
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
@@ -623,6 +658,11 @@ void Window::processInput(GLFWwindow* window)
 				}
 	//			playermovement += Camera_Speed * Cam_target;
 
+				if (currentSoundTime < 0)
+				{
+					soundObject->play2D("audio/grass_walk1.wav", GL_FALSE);
+					currentSoundTime = soundInterval;
+				}
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
@@ -638,6 +678,11 @@ void Window::processInput(GLFWwindow* window)
 					Cam_Pos.z = 0;
 				}
 //				playermovement += glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
+				if (currentSoundTime < 0)
+				{
+					soundObject->play2D("audio/grass_walk2.wav", GL_FALSE);
+					currentSoundTime = soundInterval;
+				}
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
@@ -653,6 +698,11 @@ void Window::processInput(GLFWwindow* window)
 					Cam_Pos.z = 0;
 				}
 //				playermovement -= glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
+				if (currentSoundTime < 0)
+				{
+					soundObject->play2D("audio/grass_walk2.wav", GL_FALSE);
+					currentSoundTime = soundInterval;
+				}
 			}
 		}
 	}
@@ -712,4 +762,3 @@ bool Window::return_render(Plane* top, Plane* bottom, Plane* left, Plane* right,
 	}
 	return result;
 }
-
