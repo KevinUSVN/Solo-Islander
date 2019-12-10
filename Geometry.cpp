@@ -104,8 +104,7 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 	}
 
 	/*
-	 * TODO: Section 4, you will need to normalize the object to fit in the
-	 * screen.
+	 * Readjust to center and scale the model
 	 */
 
 	 //Initialized it to the first point in the file. 
