@@ -31,12 +31,12 @@ in vec2 tex_coords;
 void main()
 {
     // Set basic colors
-    if (0 <= world_pos.y && world_pos.y < 1) //Water
+    if (0 <= world_pos.y && world_pos.y < 10) //Water
     {
-        color = vec4(0.0, 0.5, 0.8, 1);
+        color = vec4(0.2, 0.2, 0.3, 1);
         //color = texture(terrain_water, tex_coords);
     }
-    else if (1 <= world_pos.y && world_pos.y < 15) //Sand
+    else if (10 <= world_pos.y && world_pos.y < 15) //Sand
     {
         color = vec4(0.76, 0.7, 0.5, 1);
         //color = texture(terrain_sand, tex_coords);
