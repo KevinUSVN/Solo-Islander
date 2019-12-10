@@ -108,12 +108,19 @@ Skybox::Skybox()
 
 	faces =
 	{
-		"skybox/mp_majestic/mp_majestic/majestic_rt.jpg",
+		/*"skybox/mp_majestic/mp_majestic/majestic_rt.jpg",
 		"skybox/mp_majestic/mp_majestic/majestic_lf.jpg",
 		"skybox/mp_majestic/mp_majestic/majestic_up.jpg",
 		"skybox/mp_majestic/mp_majestic/majestic_dn.jpg",
 		"skybox/mp_majestic/mp_majestic/majestic_ft.jpg",
-		"skybox/mp_majestic/mp_majestic/majestic_bk.jpg"
+		"skybox/mp_majestic/mp_majestic/majestic_bk.jpg"*/
+
+		"skybox/blue_cloud/bluecloud_rt.jpg",
+		"skybox/blue_cloud/bluecloud_lf.jpg",
+		"skybox/blue_cloud/bluecloud_up.jpg",
+		"skybox/blue_cloud/bluecloud_dn.jpg",
+		"skybox/blue_cloud/bluecloud_ft.jpg",
+		"skybox/blue_cloud/bluecloud_bk.jpg"
 	};
 
 	this->cubemapTexture = loadCubemap(faces);
