@@ -16,6 +16,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "irrKlang-64bit-1.6.0/include/irrKlang.h"
 #include "shader.h"
 #include "Transform.h"
 #include "Node.h"
@@ -28,7 +29,7 @@
 #include "Skybox.h"
 #include "Water.h"
 #include <GL/glut.h>
-#include "irrKlang-64bit-1.6.0/include/irrKlang.h"
+
 
 class Window
 {
