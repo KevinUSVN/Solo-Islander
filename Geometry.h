@@ -13,9 +13,11 @@
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <vector>
 #include <string>
-#include <sstream>
+#include <string>
 #include <fstream>
+#include <sstream>
 #include <iostream>
+#include <vector>
 #include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,6 +40,7 @@ private:
 
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> curr_vertices;
+	std::vector<glm::vec3> uvs;
 	std::vector<glm::vec3> normals;
 
 	std::vector<unsigned int >vertexIndices, uvIndices, normalIndices, indices;
@@ -49,7 +52,7 @@ private:
 	std::vector<glm::vec3> scalar_dis_points;
 	glm::vec3 last_mouse_pos;
 	int timer;
-	GLuint vao, vbo[2], ebo, lamp_program, lightvao;
+	GLuint vao, vbo[2], ebo[2], lamp_program, lightvao;
 	unsigned int lightVao;
 	GLfloat centerx, centery, centerz;
 	GLfloat new_centerx, new_centery, new_centerz;

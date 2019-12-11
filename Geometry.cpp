@@ -60,6 +60,12 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 					ss >> normal.x >> normal.y >> normal.z;
 					normals.push_back(normal);
 				}
+				else if (label == "vt")
+				{
+					glm::vec3 texture;
+					ss >> texture.x >> texture.y;
+					uvs.push_back(texture);
+				}
 				//Gathered first value, ignored rest (May change later)
 				else if (label == "f")
 				{
@@ -71,7 +77,7 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 
 					std::replace(field1.begin(), field1.end(), '/', ' ');
 					std::stringstream temp_ss1(field1);
-					temp_ss1 >> vertexIndex[0];// >> uvIndex[0] >> normalIndex[0];
+					temp_ss1 >> vertexIndex[0] >> uvIndex[0] >> normalIndex[0];
 
 					std::replace(field2.begin(), field2.end(), '/', ' ');
 					std::stringstream temp_ss2(field2);
@@ -80,7 +86,7 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 					std::replace(field3.begin(), field3.end(), '/', ' ');
 					std::stringstream temp_ss3(field3);
 					temp_ss3 >> vertexIndex[2] >> uvIndex[2] >> normalIndex[2];
-
+					
 					//std::cout << normalIndex[0] << std::endl;
 
 					vertexIndices.push_back(vertexIndex[0] - 1);
@@ -245,16 +251,18 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 	// Bind to the first VBO. We will use it to store the points.
 	glGenBuffers(2, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertexIndices.size(),
-		vertexIndices.data(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
+	glGenBuffers(1, ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
+ 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertexIndices.size(),
+		&vertexIndices[0], GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * normals.size(), normals.data(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3 ) * normals.size(), &normals[0], GL_DYNAMIC_DRAW);
+
+
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), 0);
 
@@ -272,7 +280,8 @@ Geometry::~Geometry()
 {
 	glDeleteBuffers(1, &vbo[0]);
 	glDeleteBuffers(1, &vbo[1]);
-	glDeleteBuffers(1, &ebo);
+	glDeleteBuffers(1, &ebo[0]);
+	glDeleteBuffers(1, &ebo[1]);
 	glDeleteVertexArrays(1, &vao);
 }
 

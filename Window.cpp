@@ -205,7 +205,6 @@ bool Window::initializeObjects()
 	//Scenic Object
 	beach_hut = new Shape_Program("OBJ_files/testing.txt", beach_hut_T);
 	//Player Object
-	std::cout << "where ? " << std::endl;
 
 	player = new Geometry("OBJ_files/square.obj",1);
 	Player_right_hand = new Geometry("OBJ_files/RiggedHandRight.obj",1);
