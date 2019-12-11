@@ -4,15 +4,15 @@
 void Geometry::draw(glm::mat4 c, GLuint program)
 {
 	this->model = c * initial;
-	glBindVertexArray(vao);
-	setUniformColorVariable(program);
-	std::cout << "ambient : " << ambient.x << " " << ambient.y << " " << ambient.z << std::endl;
+	programShader = program; //Set shader program
+	
+	setUniformColorVariable(programShader); //Send data to shader
+	/*std::cout << "ambient : " << ambient.x << " " << ambient.y << " " << ambient.z << std::endl;
 	std::cout << "specular : " << specular.x << " " << specular.y << " " << specular.z << std::endl;
 	std::cout << "diffuse : " << diffuse.x << " " << diffuse.y << " " << diffuse.z << std::endl;
-	std::cout << "color : " << color.x << " " << color.y << " " << color.z << std::endl;
+	std::cout << "color : " << color.x << " " << color.y << " " << color.z << std::endl;*/
 
-	// Set point size.
-	// Draw points 
+	glBindVertexArray(vao);
 	if (render == true) {
 		if (render_in_triangle == true) {
 			glDrawElements(GL_TRIANGLES, vertexIndices.size(), GL_UNSIGNED_INT, 0);
@@ -239,7 +239,10 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 
 	// Set the model matrix to an identity matrix. 
 	initial = glm::scale(glm::mat4(1), glm::vec3(Scale));
-	set_Materials(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.3f, 0.7f, 0.1f), glm::vec3(0.1f, 0.2f, 0.5f), glm::vec3(0.3f, 0.2f, 0.1f), 128);
+
+	//Set colors for materials
+	set_Materials(glm::vec3(0.1f, 0.7f, 0.1f), glm::vec3(0.1f, 0.7f, 0.1f), glm::vec3(0.1f, 0.7f, 0.1f), glm::vec3(0.1f, 0.7f, 0.1f), 128);
+
 	render = true;
 	render_in_lines = false;
 	render_in_triangle = true;
@@ -315,7 +318,7 @@ void Geometry::setUniformColorVariable(GLuint program)
 	glUniform3fv(glGetUniformLocation(program, "material.diffuse"), 1, glm::value_ptr(this->diffuse));
 	glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(this->specular));
 	glUniform1f(glGetUniformLocation(program, "material.shininess"), shininess);
-	glUniform1f(glGetUniformLocation(program, "attenuationStrength"), 0.1f);
+	glUniform1f(glGetUniformLocation(program, "attenuationStrength"), 0.1f); //0.1f default
 }
 
 void Geometry::setUniformTexture(GLuint program)
@@ -347,6 +350,7 @@ void Geometry::set_Materials(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffu
 	this->diffuse = diffuse;
 	this->specular = specular;
 	this->shininess = shininess;
+	this->lightColor = glm::vec3(0.1f, 0.8f, 0.1f);
 }
 
 glm::mat4 Geometry::get_model()

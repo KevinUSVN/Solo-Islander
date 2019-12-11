@@ -86,6 +86,8 @@ private:
 	glm::vec3 viewPos;
 	glm::vec3 center;
 
+	GLuint programShader;
+
 	//Procedural object.
 	std::vector<Geometry*> next_object;
 	//Write parser for txt file.

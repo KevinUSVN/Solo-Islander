@@ -17,7 +17,7 @@ uniform vec3 lightPos;
 uniform vec3 viewPos; 
 uniform vec3 lightColor;
 
-uniform float attenuation;
+float attenuation;
 uniform float attenuationStrength;
 
 uniform Material material;
@@ -44,8 +44,8 @@ void main()
     vec3 specular = lightColor * (spec * normalize(material.specular));
 
     // attenuation (linear)
-    float attenuation = 1.0f / (attenuationStrength * length(lightPos - FragPos));
+    float attenuation = 1.0 / (attenuationStrength * length(lightPos - FragPos));
 
-    vec3 result = (ambient + diffuse + specular) * attenuation * objectColor;
+    vec3 result = (ambient + diffuse + specular) * objectColor;
     FragColor = vec4(result, 1.0);
 }
