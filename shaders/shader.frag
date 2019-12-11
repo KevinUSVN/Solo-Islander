@@ -45,7 +45,7 @@ void main()
 
     // attenuation (linear)
     float attenuation = 1.0f / (attenuationStrength * length(lightPos - FragPos));
-        
+
     vec3 result = (ambient + diffuse + specular) * attenuation * objectColor;
     FragColor = vec4(result, 1.0);
 }

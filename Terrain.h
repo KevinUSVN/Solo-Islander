@@ -48,10 +48,15 @@ public:
 	float getHeightFromVertex(int x, int y);
 	GLfloat getTerrainSize();
 	GLfloat getVertexCount();
+	unsigned int getSquareAmount();
 	void updateNormals();
 
 	GLuint loadTexture(std::string filePath);
 	void setupTextures();
+
+	GLfloat find_terrain_height(glm::vec3 Cam_Pos);
+	GLfloat barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 Pos, GLfloat scale_diff);
+
 };
 
 #endif

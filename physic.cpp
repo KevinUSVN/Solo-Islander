@@ -52,12 +52,12 @@ void Physic::detect_terrain_height(std::vector<std::vector<glm::vec3>> terrainXZ
 {
 	GLfloat x = Cam_Pos.x;
 	GLfloat z = Cam_Pos.z;
-	GLfloat scale_diff = terrain_size / vertex_count;
+	GLfloat scale_diff = terrain_size / (vertex_count-1);
 	GLint x_to_map = x / (scale_diff);
 	GLint z_to_map = z / (scale_diff);
-	GLint vertices_Location = (127 * z_to_map) + x_to_map;
+	GLint vertices_Location = ((vertex_count-1) * z_to_map) + x_to_map;
 	std::vector<glm::vec3> getSquare = terrainXZ[vertices_Location];
-	GLfloat new_X = scale_diff - Cam_Pos.z;
+	GLfloat new_X = scale_diff - (Cam_Pos.z/ terrain_size);
 	//std::cout << getSquare[0].y << " " << getSquare[1].y << " " << getSquare[2].y << " " << getSquare[3].y << std::endl;
 	if (Cam_Pos.x >= (new_X)) {
 

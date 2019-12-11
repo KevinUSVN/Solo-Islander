@@ -20,6 +20,7 @@ Skybox* Window::skybox;
 glm::vec3 Window::lightPos = glm::vec3(0.0f,100.0f,0.0f);
 Terrain* terrain;
 Water* water;
+vector<Position_Geometry*> geometry_on_pos;
 
 /*
 	Initialize all the Transformation here
@@ -32,12 +33,15 @@ Transform* player_right_hand_T;
 Transform* player_left_hand_T;
 Transform* testing_ground_T;
 Transform* world_physic_T;
-Transform* beach_hut_T;
+vector<Transform*> beach_hut_T;
+vector<Transform*> trees_pos_T;
 /*
 	Initialize all the scene object here
 */
 Geometry* light_object;
-Shape_Program* beach_hut;
+vector<Shape_Program*> beach_hut;
+vector<Geometry*> trees;
+
 
 /*
 	Initialize all the player object here
@@ -195,6 +199,43 @@ bool Window::initializeObjects()
 	terrain = new Terrain(terrain_program);
 	water = new Water(water_program);
 
+	unsigned int square_amount = terrain->getSquareAmount();
+	srand(time(NULL));
+	for (unsigned int i = 0; i < square_amount; i++)
+	{
+		Position_Geometry* new_geo = new Position_Geometry();
+		geometry_on_pos.push_back(new_geo);
+	}
+	for (unsigned int i = 0; i < 100; i++)
+	{
+		unsigned int k;
+		k = rand() % (7);
+		switch (k)
+		{
+		case 0:
+			trees.push_back(new Geometry ("OBJ_files/afro_tree_green.obj",1));
+			break;
+		case 1:
+			trees.push_back(new Geometry("OBJ_files/big_tree_green.obj", 1));
+			break;
+		case 2:
+			trees.push_back(new Geometry("OBJ_files/hipster_tree_green.obj", 1));
+			break;
+		case 3:
+			trees.push_back(new Geometry("OBJ_files/pine_tree_green.obj", 1));
+			break;
+		case 4:
+			trees.push_back(new Geometry("OBJ_files/slim_tree_green.obj", 1));
+			break;
+		case 5:
+			trees.push_back(new Geometry("OBJ_files/three_balls_tree_green.obj", 1));
+			break;
+		case 6:
+			trees.push_back(new Geometry("OBJ_files/tiny_tree_green.obj", 1));
+			break;
+		}
+	}
+
 	//Send cubeMap data to Water class
 	water->setCubeMap(skybox->getCubeMap());
 
@@ -203,7 +244,7 @@ bool Window::initializeObjects()
 	gravity->setVertexCount(terrain->getVertexCount());
 
 	//Scenic Object
-	beach_hut = new Shape_Program("OBJ_files/testing.txt", beach_hut_T);
+
 	//Player Object
 
 	player = new Geometry("OBJ_files/square.obj",1);
@@ -223,6 +264,28 @@ bool Window::initializeObjects()
 	//Play Environmental Sounds (3D)
 	//ambient3DObject->play3D("audio/water_fountain.wav", irrklang::vec3df(0.0f, 0.0f, 0.0f), GL_TRUE);
 	//ambient3DObject->setSoundVolume(0.3f);
+	srand(time(NULL));
+
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		while (1)
+		{
+			unsigned int rand_x, rand_z;
+			rand_x = rand() % ((int)(terrain->getTerrainSize())-50) + 50;
+			rand_z = rand() % ((int)(terrain->getTerrainSize())-50) + 50;
+			glm::vec3 rand_pos = glm::vec3(rand_x, 0.0f, rand_z);
+			GLfloat new_height = terrain->find_terrain_height(rand_pos);
+			if (new_height > 40.0f && new_height < 85.0f )
+			{
+				beach_hut_T.push_back(new Transform(glm::translate(glm::mat4(1), glm::vec3(rand_x, (new_height + 6.0f), rand_z))));
+				break;
+			}
+		}
+	}
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		beach_hut.push_back(new Shape_Program("OBJ_files/testing.txt", beach_hut_T[i]));
+	}
 	return true;
 }
 /*
@@ -235,13 +298,34 @@ bool Window::initializeTransforms() {
 	//Initialize physic
 
 	//Object transform
-	beach_hut_T = new Transform(glm::mat4(1));
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		beach_hut_T[i] = new Transform(glm::mat4(1));
+	}
 
 	//Player Transform
 	player_T = new Transform(glm::mat4(1));
 	player_right_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(-1.0f, 0.0f, -2.0f)));
 	player_left_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(1.0f, 0.0f, -2.0f)));
 	//Environment transform
+	srand(time(NULL));
+	for (unsigned int i = 0; i < 100; i++)
+	{
+		while (1)
+		{
+			unsigned int rand_x, rand_z;
+			rand_x = rand() % (int)(terrain->getTerrainSize());
+			rand_z = rand() % (int)(terrain->getTerrainSize());
+			glm::vec3 rand_pos = glm::vec3(rand_x, 0.0f, rand_z);
+			GLfloat new_height = terrain->find_terrain_height(rand_pos);
+			if (new_height > 15.0f && new_height < 100.0f)
+			{
+				trees_pos_T.push_back(new Transform(glm::translate(glm::mat4(1),glm::vec3(rand_x, (new_height + (abs(trees[i]->getMax_y()-trees[i]->getMin_y())/2) + 6.0f), rand_z))));
+				break;
+			}
+		}
+	}
+
 	currentNode = world_T_matrix;
 	return true;
 }
@@ -251,11 +335,14 @@ bool Window::initializeTransforms() {
 bool Window::applyTransforms() {
 	//Global
 	world_physic_T->addChild(player_T);
-
+	for (unsigned int i = 0; i < 100; i++)
+	{
+		world_T_matrix->addChild(trees_pos_T[i]);
+		trees_pos_T[i]->addChild(trees[i]);
+	}
 	//Environmental
 
 	//Scenic
-
 	//Player
 	player_T->addChild(player);
 	player_T->addChild(player_right_hand_T);
@@ -365,7 +452,6 @@ void Window::displayCallback(GLFWwindow* window)
 	projection = glm::perspective(glm::radians(fov), double(width) / (double)height, 1.0, 1400.0);
 	view = glm::lookAt(Window::Cam_Pos, Window::Cam_Pos + Window::Cam_target, Window::up);
 	
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//Draw the terrain
@@ -386,15 +472,17 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniform3f(glGetUniformLocation(water_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 	water->draw();
 
-	glUseProgram(toon_program);
-	glUniform1i(glGetUniformLocation(toon_program, "skybox"), 0);
-	currentNode->draw(glm::mat4(1), toon_program);
-	glUniformMatrix4fv(glGetUniformLocation(toon_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(toon_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glUniform3f(glGetUniformLocation(toon_program, "cameraPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
+	glUseProgram(default_program);
+	glUniform1i(glGetUniformLocation(default_program, "skybox"), 0);
+	currentNode->draw(glm::mat4(1), default_program);
+	glUniformMatrix4fv(glGetUniformLocation(default_program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(default_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniform3f(glGetUniformLocation(default_program, "cameraPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	//Draw the skybox
-	beach_hut->draw(glm::mat4(1), toon_program);
-	player_T->draw(glm::inverse(view), toon_program);
+	for (unsigned int i = 0; i < 3; i++) {
+		beach_hut[i]->draw(glm::mat4(1), default_program);
+	}
+	player_T->draw(glm::inverse(view), default_program);
 
 	glUseProgram(skybox_program);
 	//View matrix got changed.
@@ -632,9 +720,17 @@ void Window::processInput(GLFWwindow* window)
 				{
 					Cam_Pos.x = 0;
 				}
+				else if (Cam_Pos.x > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.x = terrain->getTerrainSize() - 1;
+				}
 				if (Cam_Pos.z < 0.0f)
 				{
 					Cam_Pos.z = 0;
+				}
+				else if (Cam_Pos.z > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.z = terrain->getTerrainSize() - 1;
 				}
      //			playermovement -= Camera_Speed * Cam_target;
 
@@ -653,9 +749,17 @@ void Window::processInput(GLFWwindow* window)
 				{
 					Cam_Pos.x = 0;
 				}
+				else if (Cam_Pos.x > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.x = terrain->getTerrainSize()-1;
+				}
 				if (Cam_Pos.z < 0.0f)
 				{
 					Cam_Pos.z = 0;
+				}
+				else if (Cam_Pos.z > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.z = terrain->getTerrainSize()-1;
 				}
 	//			playermovement += Camera_Speed * Cam_target;
 
@@ -674,9 +778,17 @@ void Window::processInput(GLFWwindow* window)
 				{
 					Cam_Pos.x = 0;
 				}
+				else if (Cam_Pos.x > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.x = terrain->getTerrainSize() - 1;
+				}
 				if (Cam_Pos.z < 0.0f)
 				{
 					Cam_Pos.z = 0;
+				}
+				else if (Cam_Pos.z > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.z = terrain->getTerrainSize() - 1;
 				}
 //				playermovement += glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
 				if (currentSoundTime < 0)
@@ -694,9 +806,17 @@ void Window::processInput(GLFWwindow* window)
 				{
 					Cam_Pos.x = 0;
 				}
+				else if (Cam_Pos.x > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.x = terrain->getTerrainSize() - 1;
+				}
 				if (Cam_Pos.z < 0.0f)
 				{
 					Cam_Pos.z = 0;
+				}
+				else if (Cam_Pos.z > terrain->getTerrainSize() - 1)
+				{
+					Cam_Pos.z = terrain->getTerrainSize() - 1;
 				}
 //				playermovement -= glm::normalize(glm::cross(Cam_target, up)) * Camera_Speed;
 				if (currentSoundTime < 0)

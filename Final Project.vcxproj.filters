@@ -51,6 +51,9 @@
     <ClCompile Include="Shape_Program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Position_Geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -90,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="irrKlang-64bit-1.6.0\include\irrKlang.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Position_Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,8 +5,12 @@ void Geometry::draw(glm::mat4 c, GLuint program)
 {
 	this->model = c * initial;
 	glBindVertexArray(vao);
-	setUniformVariable(program);
-	set_Materials();
+	setUniformColorVariable(program);
+	std::cout << "ambient : " << ambient.x << " " << ambient.y << " " << ambient.z << std::endl;
+	std::cout << "specular : " << specular.x << " " << specular.y << " " << specular.z << std::endl;
+	std::cout << "diffuse : " << diffuse.x << " " << diffuse.y << " " << diffuse.z << std::endl;
+	std::cout << "color : " << color.x << " " << color.y << " " << color.z << std::endl;
+
 	// Set point size.
 	// Draw points 
 	if (render == true) {
@@ -235,12 +239,7 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 
 	// Set the model matrix to an identity matrix. 
 	initial = glm::scale(glm::mat4(1), glm::vec3(Scale));
-	color = glm::vec3(1.0f, 1.0f, 1.0f);
-	ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-	diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	shininess = 128.0f;
-	this->mat_select = select;
+	set_Materials(glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.3f, 0.7f, 0.1f), glm::vec3(0.1f, 0.2f, 0.5f), glm::vec3(0.3f, 0.2f, 0.1f), 128);
 	render = true;
 	render_in_lines = false;
 	render_in_triangle = true;
@@ -304,6 +303,25 @@ void Geometry::setUniformVariable(GLuint program)
 	//glUniform1f(glGetUniformLocation(program, "attenuationStrength"), 0.1f);
 }
 
+void Geometry::setUniformColorVariable(GLuint program)
+{
+
+	// glUniform"type"(glgetUniformLocation(shader program, ""), 1,2, pointer);
+
+	glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniform3fv(glGetUniformLocation(program, "color"), 1, glm::value_ptr(color));
+	glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
+	glUniform3fv(glGetUniformLocation(program, "material.ambient"), 1, glm::value_ptr(this->ambient));
+	glUniform3fv(glGetUniformLocation(program, "material.diffuse"), 1, glm::value_ptr(this->diffuse));
+	glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(this->specular));
+	glUniform1f(glGetUniformLocation(program, "material.shininess"), shininess);
+	glUniform1f(glGetUniformLocation(program, "attenuationStrength"), 0.1f);
+}
+
+void Geometry::setUniformTexture(GLuint program)
+{
+}
+
 void Geometry::toggle_render()
 {
 	render = !render;
@@ -322,44 +340,13 @@ void Geometry::set_render_method(GLuint method)
 		render_in_triangle = true;
 	}
 }
-void Geometry::set_Materials()
+void Geometry::set_Materials(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, GLfloat shininess)
 {
-	switch (mat_select)
-	{
-	case 1: //default
-		//materials
-		ambient = glm::vec3(0.7f, 0.7f, 0.7f);
-		diffuse = glm::vec3(0.7f, 0.7f, 0.7f);
-		specular = glm::vec3(0.7f, 0.7f, 0.7f);
-		shininess = 0.1f * 32;
-
-		//color
-		color = glm::vec3(0.0f, 0.7f, 0.2f);
-		lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-		break;
-	case 2: //black
-		//materials
-		ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-		diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-		specular = glm::vec3(1.0f, 1.0f, 1.0f);
-		shininess = 0.1f * 32;
-
-		//color
-		color = glm::vec3(0.0f, 0.0f, 0.0f);
-		lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-		break;
-	default:
-		//materials
-		ambient = glm::vec3(0.135f, 0.2225f, 0.1575f);
-		diffuse = glm::vec3(0.54f, 0.89f, 0.63f);
-		specular = glm::vec3(0.316228f, 0.316228f, 0.316228f);
-		shininess = 0.1f * 32;
-
-		//color
-		color = glm::vec3(0.0f, 0.7f, 0.2f);
-		lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-		break;
-	}
+	this->color = color;
+	this->ambient = ambient;
+	this->diffuse = diffuse;
+	this->specular = specular;
+	this->shininess = shininess;
 }
 
 glm::mat4 Geometry::get_model()

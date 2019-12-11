@@ -435,6 +435,12 @@ void Terrain::fixEdges()
 	}
 }
 
+unsigned int Terrain::getSquareAmount()
+{
+	return this->square_location.size();
+}
+
+
 void Terrain::update()
 {
 	vertices.clear();
@@ -447,4 +453,40 @@ void Terrain::update()
 	initTerrain();
 	setBuffers();
 	draw();
+}
+
+GLfloat Terrain::find_terrain_height(glm::vec3 Cam_Pos)
+{
+	GLfloat x = Cam_Pos.x;
+	GLfloat z = Cam_Pos.z;
+	GLfloat scale_diff = this->terrain_size / (this->vertex_count-1);
+	GLint x_to_map = x / (scale_diff);
+	GLint z_to_map = z / (scale_diff);
+	std::cout << "Z:" << z_to_map << "X: " << x_to_map  << " " << this->vertex_count-1 << std::endl;
+	GLint vertices_Location = ((this->vertex_count-1) * (z_to_map)) + (x_to_map);
+	std::cout << vertices_Location << std::endl;
+	std::vector<glm::vec3> getSquare = square_location[vertices_Location];
+	GLfloat new_X = scale_diff - (Cam_Pos.z/this->terrain_size);
+	//std::cout << getSquare[0].y << " " << getSquare[1].y << " " << getSquare[2].y << " " << getSquare[3].y << std::endl;
+	if (Cam_Pos.x >= (new_X)) {
+
+		return barryCentric(getSquare[1], getSquare[0], getSquare[2], Cam_Pos, scale_diff);
+
+	}
+	else if (Cam_Pos.x < new_X)
+	{
+		return barryCentric(getSquare[1], getSquare[3], getSquare[2], Cam_Pos, scale_diff);
+	}
+	//std::cout << this->terrain_height << std::endl;
+}
+
+GLfloat Terrain::barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 Pos, GLfloat scale_diff)
+{
+	GLfloat det = ((p2.z - p3.z) * (p1.x - p3.x)) + ((p3.x - p2.x) * (p1.z - p3.z));
+	GLfloat l1 = (((p2.z - p3.z) * (Pos.x - p3.x)) + ((p3.x - p2.x) * (Pos.z - p3.z))) / det;
+	GLfloat l2 = (((p3.z - p1.z) * (Pos.x - p3.x)) + ((p1.x - p3.x) * (Pos.z - p3.z))) / det;
+	GLfloat l3 = scale_diff - l1 - l2;
+	//	std::cout << l1 << " " << l2 << " " << l3 << std::endl;
+	return ((l1 * p1.y) + (l2 * p2.y) + (l3 * p3.y)) / scale_diff;
+
 }

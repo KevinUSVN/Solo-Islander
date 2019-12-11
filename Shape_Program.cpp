@@ -1,6 +1,7 @@
 #include "Shape_Program.h"
 
 Shape_Program::Shape_Program(std::string file_name, Transform* transform) {
+	srand(time(NULL));
 	if (file_name.substr(file_name.find_last_of(".") + 1) == "txt")
 	{
 		std::ifstream txtfile(file_name);
@@ -90,7 +91,8 @@ Shape_Program::Shape_Program(std::string file_name, Transform* transform) {
 							//Defining the transform for the currnet object
 							GLfloat x, y, z, size;
 							ss_t >> x >> y >> z >> size;
-							Transform* new_Transform = new Transform(glm::translate(glm::vec3(x, y, z)));
+							Transform* new_Transform = transform;
+							new_Transform->update(glm::translate(glm::vec3(x, y, z)));
 							object->scale(glm::vec3(size));
 							new_Transform->addChild(object);
 							head_transform = new_Transform;
@@ -189,7 +191,6 @@ void Shape_Program::connect_Obj(std::string starting_obj, Transform * head_trans
 			//Can modify Object_Index to read | and use rand() to generate different object.
 			std::string Transforms;
 			ss >> Object_Index >> Transforms;
-
 			std::replace(Object_Index.begin(), Object_Index.end(), '|', ' ');
 			std::stringstream or_detect(Object_Index);
 			unsigned int j = 1;
@@ -197,14 +198,16 @@ void Shape_Program::connect_Obj(std::string starting_obj, Transform * head_trans
 			std::vector<std::string> SomeString;
 			while (or_detect >> index_name)
 			{
+
 				SomeString.push_back(index_name);
 			}
 			if (SomeString.size() >= 2)
 			{
-				srand(time(NULL));
 				unsigned int k;
 				k = rand() % (SomeString.size());
 				Object_Index = SomeString[k];
+				std::cout << Object_Index << std::endl;
+
 			}
 			auto new_obj_index = std::find_if(allTransform.begin(), allTransform.end(), [Object_Index](const std::tuple<Transform*, std::string, vector<std::string>>& element) { return get<1>(element) == Object_Index; });
 			std::replace(Transforms.begin(), Transforms.end(), ',', ' ');

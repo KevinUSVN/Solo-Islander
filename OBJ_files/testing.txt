@@ -1,11 +1,29 @@
 file start
-A OBJ_files/square.obj
-B OBJ_files/sphere.obj
-C OBJ_files/testing_ground.obj
+A OBJ_files/floor.obj
+B OBJ_files/right_wall.obj
+C OBJ_files/left_wall.obj
+D OBJ_files/roof.obj
+E OBJ_files/stair1.obj
+F OBJ_files/stair2.obj
+G OBJ_files/stair3.obj
+H OBJ_files/stair4.obj
+I OBJ_files/hut_leg.obj
+J OBJ_files/hut_leg.obj
+K OBJ_files/wall_2.obj
+L OBJ_files/wall_2.obj
 file end
 
 rule start
-/ A 500.0,100.0,500.0,1.0 -> B|C 0.0,2.0,0.0,1.0
+/ A 0.0,0.0,0.0,50.0 -> D 0.0,100.0,0.0,50.0 -> C|K 45.0,40.0,0.0,50 -> H 0.0,-7.414,61.09,50.0 -> I 39.7665,-6.6725,-44.5995,50.0 -> I 39.7665,-6.6725,44.5995,50.0
 - B 0.0,0.0,0.0,1.0
-- C 0.0,0.0,0.0,1.0
+- C 0.0,0.0,0.0,1.0 -> B|L -90.0,0.0,0.0,50.0
+- D 0.0,0.0,0.0,1.0
+- H 0.0,0.0,0.0,1.0 -> G 0.0,-1.725,5.4,50.0
+- G 0.0,0.0,0.0,1.0 -> F 0.0,-1.75,5.27,50.0
+- F 0.0,0.0,0.0,1.0 -> E 0.0,-1.775,5.085,50.0
+- E 0.0,0.0,0.0,1.0
+- I 0.0,0.0,0.0,1.0 -> J -79.533,0,0,50.0
+- J 0.0,0.0,0.0,1.0
+- K 0.0,0.0,0.0,1.0 -> L|B -90.0,0.0,0.0,50.0
+- L 0.0,0.0,0.0,1.0
 rule end

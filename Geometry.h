@@ -100,9 +100,11 @@ public:
 	void draw(glm::mat4 c, GLuint program);
 	void scale(glm::vec3 scale_value);
 	void alignData();
-	void set_Materials();
+	void set_Materials(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, GLfloat shininess);
 	void toggle_render();
 	void setUniformVariable(GLuint program);
+	void setUniformTexture(GLuint program);
+	void setUniformColorVariable(GLuint program);
 	void set_render_method(GLuint method);
 	void set_render(bool render);
 	glm::mat4 get_model();
