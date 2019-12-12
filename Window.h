@@ -27,6 +27,7 @@
 #include "Plane.h"
 #include "Terrain.h"
 #include "Skybox.h"
+#include <random>
 #include "Water.h"
 #include "Position_Geometry.h"
 #include <GL/glut.h>

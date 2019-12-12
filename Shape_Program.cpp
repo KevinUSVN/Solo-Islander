@@ -81,6 +81,26 @@ Shape_Program::Shape_Program(std::string file_name, Transform* transform) {
 						if (word == "/") {
 							std::string Object_Index;
 							ss >> Object_Index;
+							std::replace(Object_Index.begin(), Object_Index.end(), '|', ' ');
+							std::stringstream or_detect(Object_Index);
+							unsigned int j = 1;
+							std::string index_name;
+							std::vector<std::string> SomeString;
+							while (or_detect >> index_name)
+							{
+
+								SomeString.push_back(index_name);
+							}
+
+							if (SomeString.size() >= 2)
+							{
+								std::random_device rd;
+								std::mt19937 gen(rd());
+								std::uniform_int_distribution<> dis(0, SomeString.size() - 1);
+								unsigned int k;
+								k = dis(gen);
+								Object_Index = SomeString[k];
+							}
 							auto it = std::find_if(index_OBJ.begin(), index_OBJ.end(), [Object_Index](const std::pair<std::string, std::string>& element) { return element.first == Object_Index; });
 							std::string translate_pos;
 							ss >> translate_pos;
@@ -202,10 +222,14 @@ void Shape_Program::connect_Obj(std::string starting_obj, Transform * head_trans
 
 				SomeString.push_back(index_name);
 			}
+
 			if (SomeString.size() >= 2)
 			{
+				std::random_device rd;
+				std::mt19937 gen(rd());
+				std::uniform_int_distribution<> dis(0, SomeString.size()-1);
 				unsigned int k;
-				k = rand() % (SomeString.size());
+				k = dis(gen);
 				Object_Index = SomeString[k];
 				std::cout << Object_Index << std::endl;
 

@@ -397,6 +397,22 @@ void Geometry::set_Materials(std::string ColorOption)
 		current_diffuse = glm::vec3(0.142f, 0.052f, 0.023f);
 		current_specular = glm::vec3(0.076f, 0.076f, 0.076f);
 	}
+	else if (ColorOption == "Material.005")
+	{
+		current_color = glm::vec3(0.8f,0.8f,0.8f);
+	}
+	else if (ColorOption == "Material.002")
+	{
+		current_color = glm::vec3(0.8f, 0.622f, 0.015f);
+	}
+	else if (ColorOption == "blue")
+	{
+		current_color = glm::vec3(0.07f, 0.539f, 0.515f);
+	}
+	else if (ColorOption == "Material")
+	{
+		current_color = glm::vec3(0.8f, 0.065f, 0.018f);
+	}
 }
 
 glm::mat4 Geometry::get_model()

@@ -35,12 +35,15 @@ Transform* testing_ground_T;
 Transform* world_physic_T;
 vector<Transform*> beach_hut_T;
 vector<Transform*> trees_pos_T;
+vector<Transform*> misc_T;
+
 /*
 	Initialize all the scene object here
 */
 Geometry* light_object;
 vector<Shape_Program*> beach_hut;
 vector<Geometry*> trees;
+vector<Geometry*> misc;
 
 
 /*
@@ -198,16 +201,18 @@ bool Window::initializeObjects()
 	water = new Water(water_program);
 
 	unsigned int square_amount = terrain->getSquareAmount();
-	srand(time(NULL));
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dis(0, 6);
 	for (unsigned int i = 0; i < square_amount; i++)
 	{
 		Position_Geometry* new_geo = new Position_Geometry();
 		geometry_on_pos.push_back(new_geo);
 	}
-	for (unsigned int i = 0; i < 100; i++)
+	for (unsigned int i = 0; i < 300; i++)
 	{
 		unsigned int k;
-		k = rand() % (7);
+		k = dis(gen);
 		switch (k)
 		{
 		case 0:
@@ -232,6 +237,37 @@ bool Window::initializeObjects()
 			trees.push_back(new Geometry("OBJ_files/tiny_tree_green.obj", 1));
 			break;
 		}
+	}
+	std::uniform_int_distribution<> misc_dis(0, 6);
+	for (unsigned int i = 0; i < 300; i++)
+	{
+		unsigned int k;
+		k = misc_dis(gen);
+		switch (k)
+		{
+		case 0:
+			misc.push_back(new Geometry("OBJ_files/blue_flower.obj", 1));
+			break;
+		case 1:
+			misc.push_back(new Geometry("OBJ_files/red_flower.obj", 1));
+			break;
+		case 2:
+			misc.push_back(new Geometry("OBJ_files/yellow_flower.obj", 1));
+			break;
+		case 3:
+			misc.push_back(new Geometry("OBJ_files/green_grass.obj", 1));
+			break;
+		case 4:
+			misc.push_back(new Geometry("OBJ_files/green_round_bush.obj", 1));
+			break;
+		case 5:
+			misc.push_back(new Geometry("OBJ_files/green_small_bush.obj", 1));
+			break;
+		case 6:
+			misc.push_back(new Geometry("OBJ_files/green_spikey_bush.obj", 1));
+			break;
+		}
+
 	}
 
 	//Send cubeMap data to Water class
@@ -307,7 +343,7 @@ bool Window::initializeTransforms() {
 	player_left_hand_T = new Transform(glm::translate(glm::mat4(1),glm::vec3(1.0f, 0.0f, -2.0f)));
 	//Environment transform
 	srand(time(NULL));
-	for (unsigned int i = 0; i < 100; i++)
+	for (unsigned int i = 0; i < 300; i++)
 	{
 		while (1)
 		{
@@ -318,7 +354,23 @@ bool Window::initializeTransforms() {
 			GLfloat new_height = terrain->find_terrain_height(rand_pos);
 			if (new_height > 15.0f && new_height < 100.0f)
 			{
-				trees_pos_T.push_back(new Transform(glm::translate(glm::mat4(1),glm::vec3(rand_x, (new_height + (abs(trees[i]->getMax_y())/2) + 8.0f), rand_z))));
+				trees_pos_T.push_back(new Transform(glm::translate(glm::mat4(1),glm::vec3(rand_x, (new_height + (abs(trees[i]->getMax_y()-trees[i]->getMin_y())/2)+5.0f), rand_z))));
+				break;
+			}
+		}
+	}
+	for (unsigned int i = 0; i < 300; i++)
+	{
+		while (1)
+		{
+			unsigned int rand_x, rand_z;
+			rand_x = rand() % (int)(terrain->getTerrainSize());
+			rand_z = rand() % (int)(terrain->getTerrainSize());
+			glm::vec3 rand_pos = glm::vec3(rand_x, 0.0f, rand_z);
+			GLfloat new_height = terrain->find_terrain_height(rand_pos);
+			if (new_height > 15.0f && new_height < 100.0f)
+			{
+				misc_T.push_back(new Transform(glm::translate(glm::mat4(1), glm::vec3(rand_x, (new_height + (abs(misc[i]->getMax_y() - misc[i]->getMin_y()) / 2) + 5.0f), rand_z))));
 				break;
 			}
 		}
@@ -333,10 +385,12 @@ bool Window::initializeTransforms() {
 bool Window::applyTransforms() {
 	//Global
 	world_physic_T->addChild(player_T);
-	for (unsigned int i = 0; i < 100; i++)
+	for (unsigned int i = 0; i < 300; i++)
 	{
 		world_T_matrix->addChild(trees_pos_T[i]);
 		trees_pos_T[i]->addChild(trees[i]);
+		world_T_matrix->addChild(misc_T[i]);
+		misc_T[i]->addChild(misc[i]);
 	}
 	//Environmental
 
@@ -480,7 +534,7 @@ void Window::displayCallback(GLFWwindow* window)
 	for (unsigned int i = 0; i < 3; i++) {
 		beach_hut[i]->draw(glm::mat4(1), default_program);
 	}
-	player_T->draw(glm::inverse(view), default_program);
+	//player_T->draw(glm::inverse(view), default_program);
 
 	glUseProgram(skybox_program);
 	//View matrix got changed.
@@ -594,7 +648,7 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 					}
 				}
 			}
-			for (unsigned int i = 0; i < 100; i++)
+			for (unsigned int i = 0; i < 300; i++)
 			{
 				while (1)
 				{
@@ -606,6 +660,22 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 					if (new_height > 15.0f && new_height < 100.0f)
 					{
 						trees_pos_T[i]->update(glm::inverse(trees_pos_T[i]->getTransform()) *glm::translate(glm::mat4(1), glm::vec3(rand_x, (new_height + 6.0f), rand_z)));
+						break;
+					}
+				}
+			}
+			for (unsigned int i = 0; i < 300; i++)
+			{
+				while (1)
+				{
+					unsigned int rand_x, rand_z;
+					rand_x = rand() % (int)(terrain->getTerrainSize());
+					rand_z = rand() % (int)(terrain->getTerrainSize());
+					glm::vec3 rand_pos = glm::vec3(rand_x, 0.0f, rand_z);
+					GLfloat new_height = terrain->find_terrain_height(rand_pos);
+					if (new_height > 15.0f && new_height < 100.0f)
+					{
+						misc_T[i]->update(glm::inverse(misc_T[i]->getTransform()) * glm::translate(glm::mat4(1), glm::vec3(rand_x, (new_height + 6.0f), rand_z)));
 						break;
 					}
 				}
