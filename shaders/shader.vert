@@ -8,20 +8,19 @@
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texCoords;
+layout (location = 2) in vec3 color;
+
 
 // Uniform variables can be updated by fetching their location and passing values to that location
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
-uniform vec3 color;
 
 // Outputs of the vertex shader are the inputs of the same name of the fragment shader.
 // The default output, gl_Position, should be assigned something. You can define as many
 // extra outputs as you need.
 out vec3 Normal;
 out vec3 FragPos;
-out vec2 TexCoords;
 out vec3 objectColor;
 
 void main()
@@ -30,6 +29,8 @@ void main()
     gl_Position = projection * view * model * vec4(position, 1.0);
     FragPos = vec3(model * vec4(position, 1.0f));
 	Normal = vec3(mat4(transpose(inverse(model))) * vec4(normal, 1.0f));
-    TexCoords = texCoords;
     objectColor = color;
+//  ambient_in = ambient;
+//  specular_in = specualr;
+//  diffuse_in = diffuse;   
 }

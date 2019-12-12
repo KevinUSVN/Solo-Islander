@@ -182,9 +182,7 @@ bool Window::initializeProgram() {
 		std::cerr << "Failed to initialize shader program" << std::endl;
 		return false;
 	}
-	program = default_program;
 	// Activate the shader program.
-	glUseProgram(program);
 	// Get the locations of uniform variables.
 
 	return true;
@@ -320,7 +318,7 @@ bool Window::initializeTransforms() {
 			GLfloat new_height = terrain->find_terrain_height(rand_pos);
 			if (new_height > 15.0f && new_height < 100.0f)
 			{
-				trees_pos_T.push_back(new Transform(glm::translate(glm::mat4(1),glm::vec3(rand_x, (new_height + (abs(trees[i]->getMax_y()-trees[i]->getMin_y())/2) + 6.0f), rand_z))));
+				trees_pos_T.push_back(new Transform(glm::translate(glm::mat4(1),glm::vec3(rand_x, (new_height + (abs(trees[i]->getMax_y())/2) + 8.0f), rand_z))));
 				break;
 			}
 		}
@@ -579,6 +577,39 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 		case GLFW_KEY_R:
 			soundObject->play2D("audio/chop.wav", GL_FALSE);
 			terrain->update();
+			for (unsigned int i = 0; i < 3; i++)
+			{
+				while (1)
+				{
+					unsigned int rand_x, rand_z;
+					rand_x = rand() % ((int)(terrain->getTerrainSize()) - 50) + 50;
+					rand_z = rand() % ((int)(terrain->getTerrainSize()) - 50) + 50;
+					glm::vec3 rand_pos = glm::vec3(rand_x, 0.0f, rand_z);
+					GLfloat new_height = terrain->find_terrain_height(rand_pos);
+					if (new_height > 40.0f && new_height < 85.0f)
+					{
+						beach_hut_T[i] = new Transform(glm::translate(glm::vec3(rand_x, (new_height + 6.0f), rand_z)));
+						beach_hut[i]->updateHeadTransform(beach_hut_T[i]);
+						break;
+					}
+				}
+			}
+			for (unsigned int i = 0; i < 100; i++)
+			{
+				while (1)
+				{
+					unsigned int rand_x, rand_z;
+					rand_x = rand() % (int)(terrain->getTerrainSize());
+					rand_z = rand() % (int)(terrain->getTerrainSize());
+					glm::vec3 rand_pos = glm::vec3(rand_x, 0.0f, rand_z);
+					GLfloat new_height = terrain->find_terrain_height(rand_pos);
+					if (new_height > 15.0f && new_height < 100.0f)
+					{
+						trees_pos_T[i]->update(glm::inverse(trees_pos_T[i]->getTransform()) *glm::translate(glm::mat4(1), glm::vec3(rand_x, (new_height + 6.0f), rand_z)));
+						break;
+					}
+				}
+			}
 			break;
 		default:
 			break;

@@ -6,7 +6,7 @@ void Geometry::draw(glm::mat4 c, GLuint program)
 	this->model = c * initial;
 	programShader = program; //Set shader program
 	
-	setUniformColorVariable(programShader); //Send data to shader
+	setUniformColorVariable(program); //Send data to shader
 	/*std::cout << "ambient : " << ambient.x << " " << ambient.y << " " << ambient.z << std::endl;
 	std::cout << "specular : " << specular.x << " " << specular.y << " " << specular.z << std::endl;
 	std::cout << "diffuse : " << diffuse.x << " " << diffuse.y << " " << diffuse.z << std::endl;
@@ -57,6 +57,10 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 
 					// Process the point. For example, you can save it to a.
 					vertices.push_back(point);
+					colors.push_back(glm::vec3(0.5f,0.0f,0.0f));
+					//ambient.push_back(glm::vec3(0.0f));
+					//diffuse.push_back(glm::vec3(0.0f));
+					//specular.push_back(glm::vec3(0.0f));
 				}
 				else if (label == "vn")
 				{
@@ -102,6 +106,24 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 					normalIndices.push_back(normalIndex[0] - 1);
 					normalIndices.push_back(normalIndex[1] - 1);
 					normalIndices.push_back(normalIndex[2] - 1);
+					colors[vertexIndex[0]-1] = current_color;
+					colors[vertexIndex[1]-1] = current_color;
+					colors[vertexIndex[2]-1] = current_color;
+					//ambient[vertexIndex[0]-1] = current_ambient;
+					//ambient[vertexIndex[1]-1] = current_ambient;
+					//ambient[vertexIndex[2]-1] = current_ambient;
+					//diffuse[vertexIndex[0]-1] = current_diffuse;
+					//diffuse[vertexIndex[1]-1] = current_diffuse;
+					//diffuse[vertexIndex[2]-1] = current_diffuse;
+					//specular[vertexIndex[0]-1] = current_specular;
+					//specular[vertexIndex[1]-1] = current_specular;
+					//specular[vertexIndex[2]-1] = current_specular;
+				}
+				else if (label == "usemtl")
+				{
+					std::string color_option;
+					ss >> color_option;
+					set_Materials(color_option);
 				}
 			}
 		}
@@ -241,8 +263,6 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 	initial = glm::scale(glm::mat4(1), glm::vec3(Scale));
 
 	//Set colors for materials
-	set_Materials(glm::vec3(0.1f, 0.7f, 0.1f), glm::vec3(0.1f, 0.7f, 0.1f), glm::vec3(0.1f, 0.7f, 0.1f), glm::vec3(0.1f, 0.7f, 0.1f), 128);
-
 	render = true;
 	render_in_lines = false;
 	render_in_triangle = true;
@@ -251,24 +271,35 @@ Geometry::Geometry(std::string objFilename, GLuint select)
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	// Bind to the first VBO. We will use it to store the points.
-	glGenBuffers(2, vbo);
+	glGenBuffers(3, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), &vertices[0], GL_DYNAMIC_DRAW);
-	glGenBuffers(1, ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
  	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertexIndices.size(),
-		&vertexIndices[0], GL_DYNAMIC_DRAW);
+		&vertexIndices[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3 ) * normals.size(), &normals[0], GL_DYNAMIC_DRAW);
-
-
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), 0);
-
-
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)* colors.size(), &colors[0], GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * ambient.size(), &ambient[0], GL_DYNAMIC_DRAW);
+	//glEnableVertexAttribArray(4);
+	//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * diffuse.size(), &diffuse[0], GL_DYNAMIC_DRAW);
+	//glEnableVertexAttribArray(5);
+	//glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * specular.size(), &specular[0], GL_DYNAMIC_DRAW);
+	//glEnableVertexAttribArray(6);
+	//glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), 0);
 	// Store index array in an element buffer
 
 
@@ -282,8 +313,9 @@ Geometry::~Geometry()
 {
 	glDeleteBuffers(1, &vbo[0]);
 	glDeleteBuffers(1, &vbo[1]);
-	glDeleteBuffers(1, &ebo[0]);
-	glDeleteBuffers(1, &ebo[1]);
+	glDeleteBuffers(1, &vbo[2]);
+	glDeleteBuffers(1, &ebo);
+
 	glDeleteVertexArrays(1, &vao);
 }
 
@@ -312,11 +344,11 @@ void Geometry::setUniformColorVariable(GLuint program)
 	// glUniform"type"(glgetUniformLocation(shader program, ""), 1,2, pointer);
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniform3fv(glGetUniformLocation(program, "color"), 1, glm::value_ptr(color));
+	//glUniform3fv(glGetUniformLocation(program, "color"), 1, glm::value_ptr(color));
 	glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightColor));
-	glUniform3fv(glGetUniformLocation(program, "material.ambient"), 1, glm::value_ptr(this->ambient));
-	glUniform3fv(glGetUniformLocation(program, "material.diffuse"), 1, glm::value_ptr(this->diffuse));
-	glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(this->specular));
+	//glUniform3fv(glGetUniformLocation(program, "material.ambient"), 1, glm::value_ptr(this->current_ambient));
+	//glUniform3fv(glGetUniformLocation(program, "material.diffuse"), 1, glm::value_ptr(this->current_diffuse));
+	//glUniform3fv(glGetUniformLocation(program, "material.specular"), 1, glm::value_ptr(this->current_specular));
 	glUniform1f(glGetUniformLocation(program, "material.shininess"), shininess);
 	glUniform1f(glGetUniformLocation(program, "attenuationStrength"), 0.1f); //0.1f default
 }
@@ -343,14 +375,28 @@ void Geometry::set_render_method(GLuint method)
 		render_in_triangle = true;
 	}
 }
-void Geometry::set_Materials(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, GLfloat shininess)
+void Geometry::set_Materials(std::string ColorOption)
 {
-	this->color = color;
-	this->ambient = ambient;
-	this->diffuse = diffuse;
-	this->specular = specular;
-	this->shininess = shininess;
-	this->lightColor = glm::vec3(0.1f, 0.8f, 0.1f);
+	if (ColorOption == "Material.001") {
+		current_color = glm::vec3(0.048f, 0.124f, 0.017f);
+		current_ambient = glm::vec3(0.5f,0.5f,0.5f);
+		current_diffuse = glm::vec3(0.048f,0.124f,0.017f);
+		current_specular = glm::vec3(0.5f,0.5f,0.5f);
+	}
+	else if (ColorOption == "GreenLeaves")
+	{
+		current_color = glm::vec3(0.172f, 0.389f, 0.027f);
+		current_ambient = glm::vec3(0.5f, 0.5f, 0.5f);
+		current_diffuse = glm::vec3(0.172f, 0.389f, 0.027f);
+		current_specular = glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+	else if (ColorOption == "Trunck")
+	{
+		current_color = glm::vec3(0.142f, 0.052f, 0.023f);
+		current_ambient = glm::vec3(0.5f, 0.5f, 0.5f);
+		current_diffuse = glm::vec3(0.142f, 0.052f, 0.023f);
+		current_specular = glm::vec3(0.076f, 0.076f, 0.076f);
+	}
 }
 
 glm::mat4 Geometry::get_model()

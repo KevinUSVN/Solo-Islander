@@ -95,7 +95,8 @@ Shape_Program::Shape_Program(std::string file_name, Transform* transform) {
 							new_Transform->update(glm::translate(glm::vec3(x, y, z)));
 							object->scale(glm::vec3(size));
 							new_Transform->addChild(object);
-							head_transform = new_Transform;
+							starting_Geo = object;
+							this->head_transform = new_Transform;
 							vector<std::string> next_list;
 							//Defining the next objects.
 							while (ss >> content) {
@@ -236,4 +237,13 @@ void Shape_Program::connect_Obj(std::string starting_obj, Transform * head_trans
 void Shape_Program::draw(glm::mat4 matrix, GLuint program)
 {
 	head_transform->draw(glm::mat4(1), program);
+}
+
+void Shape_Program::updateHeadTransform(Transform* transform)
+{
+	//head_transform->update(glm::inverse(head_transform->getTransform()));
+	std::string object_index = starting_object;
+	head_transform = transform;
+	head_transform->addChild(starting_Geo);
+	connect_Obj(starting_object, this->head_transform);
 }

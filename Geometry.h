@@ -42,6 +42,10 @@ private:
 	std::vector<glm::vec3> curr_vertices;
 	std::vector<glm::vec3> uvs;
 	std::vector<glm::vec3> normals;
+	std::vector<glm::vec3> colors;
+	std::vector<glm::vec3> ambient;
+	std::vector<glm::vec3> diffuse;
+	std::vector<glm::vec3> specular;
 
 	std::vector<unsigned int >vertexIndices, uvIndices, normalIndices, indices;
 
@@ -52,7 +56,7 @@ private:
 	std::vector<glm::vec3> scalar_dis_points;
 	glm::vec3 last_mouse_pos;
 	int timer;
-	GLuint vao, vbo[2], ebo[2], lamp_program, lightvao;
+	GLuint vao, vbo[6], ebo, lamp_program, lightvao;
 	unsigned int lightVao;
 	GLfloat centerx, centery, centerz;
 	GLfloat new_centerx, new_centery, new_centerz;
@@ -74,13 +78,13 @@ private:
 	bool render_in_lines;
 	bool render_in_triangle;
 
+	glm::vec3 current_color;
+	glm::vec3 current_ambient;
+	glm::vec3 current_diffuse;
+	glm::vec3 current_specular;
 	glm::vec3 normal;
-	glm::vec3 color;
 	glm::vec3 lightColor;
 	glm::vec3 lightPos;
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
 	GLfloat shininess;
 	GLfloat attenuation;
 	glm::vec3 viewPos;
@@ -102,7 +106,7 @@ public:
 	void draw(glm::mat4 c, GLuint program);
 	void scale(glm::vec3 scale_value);
 	void alignData();
-	void set_Materials(glm::vec3 color, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, GLfloat shininess);
+	void set_Materials(std::string ColorOption);
 	void toggle_render();
 	void setUniformVariable(GLuint program);
 	void setUniformTexture(GLuint program);

@@ -40,12 +40,15 @@ class Shape_Program
 		std::vector<std::tuple<Transform*,std::string, vector<std::string>>> allTransform;
 		std::string starting_object;
 		Transform* head_transform;
+		Geometry* starting_Geo;
+
 	public:
 		Shape_Program(std::string file_name, Transform * transform);
 		~Shape_Program();
 
 		void connect_Obj(std::string starting_obj, Transform * head_transform);
 		void draw(glm::mat4 matrix, GLuint program);
+		void updateHeadTransform(Transform* transform);
 };
 
 #endif

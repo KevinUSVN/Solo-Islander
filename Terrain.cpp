@@ -462,7 +462,7 @@ GLfloat Terrain::find_terrain_height(glm::vec3 Cam_Pos)
 	GLfloat scale_diff = this->terrain_size / (this->vertex_count-1);
 	GLint x_to_map = x / (scale_diff);
 	GLint z_to_map = z / (scale_diff);
-	std::cout << "Z:" << z_to_map << "X: " << x_to_map  << " " << this->vertex_count-1 << std::endl;
+	//std::cout << "Z:" << z_to_map << "X: " << x_to_map  << " " << this->vertex_count-1 << std::endl;
 	GLint vertices_Location = ((this->vertex_count-1) * (z_to_map)) + (x_to_map);
 	std::cout << vertices_Location << std::endl;
 	std::vector<glm::vec3> getSquare = square_location[vertices_Location];

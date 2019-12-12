@@ -2,8 +2,8 @@
 
 struct Material {
     vec3 ambient;
-    vec3 diffuse;
     vec3 specular;
+    vec3 diffuse;
     float shininess;
 };
 
@@ -12,6 +12,7 @@ out vec4 FragColor;
 in vec3 Normal;  
 in vec3 FragPos;
 in vec3 objectColor;
+
   
 uniform vec3 lightPos; 
 uniform vec3 viewPos; 
@@ -30,7 +31,7 @@ void main()
 
     // ambient
     vec3 ambient = lightColor * normalize(material.ambient);
-  	
+    
     // diffuse 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
@@ -45,7 +46,7 @@ void main()
 
     // attenuation (linear)
     float attenuation = 1.0 / (attenuationStrength * length(lightPos - FragPos));
-
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+    //(ambient + diffuse + specular) *
+    vec3 result =  objectColor;
     FragColor = vec4(result, 1.0);
 }
