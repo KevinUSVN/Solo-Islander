@@ -31,7 +31,7 @@ private:
 	int plane_size = 2000;
 	int vertex_count = 128;
 
-	float wave_speed = 0.00001f;
+	float wave_speed = 0.0001f;
 	float move_factor = 0.0f;
 
 	float start_time;

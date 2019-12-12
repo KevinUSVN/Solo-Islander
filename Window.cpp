@@ -91,6 +91,8 @@ bool pause = false;
 int Point_index = 0;
 bool alternator_true = true;
 bool alternator_false = true;
+bool toon_on = true;
+bool water_on = true;
 
 /*
 	Initialize all the time variable here
@@ -98,7 +100,7 @@ bool alternator_false = true;
 float last_time = 0.0f;
 float current_time = 0.0f;
 GLfloat currentSoundTime = 0.0f;
-GLfloat soundInterval = 200.0f; // Define sound delay, lower = faster, higher = slower
+GLfloat soundInterval = 50.0f; // Define sound delay, lower = faster, higher = slower
 
 
 /*
@@ -513,6 +515,7 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(terrain_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(glGetUniformLocation(terrain_program, "viewPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	glUniform3f(glGetUniformLocation(terrain_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+	glUniform1i(glGetUniformLocation(terrain_program, "toon_on"), toon_on);
 	terrain->draw();
 	//Draw the water
 	//Draw the terrain
@@ -522,6 +525,7 @@ void Window::displayCallback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(water_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(glGetUniformLocation(water_program, "viewPos"), Cam_Pos.x, Cam_Pos.y, Cam_Pos.z);
 	glUniform3f(glGetUniformLocation(water_program, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+	glUniform1i(glGetUniformLocation(water_program, "water_on"), water_on);
 	water->draw();
 
 	glUseProgram(default_program);
@@ -564,16 +568,21 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 			glfwSetWindowShouldClose(window, GL_TRUE);
 			break;
 		case GLFW_KEY_N:
-			if (normal_on)
+			soundObject->play2D("audio/chop.wav", GL_FALSE);
+			if (toon_on)
 			{
-				program = normal_color_program;
-				normal_on = !normal_on;
+				//program = normal_color_program;
+				toon_on = !toon_on;
 			}
 			else
 			{
-				program = default_program;
-				normal_on = !normal_on;
+				//program = default_program;
+				toon_on = !toon_on;
 			}
+			break;
+		case GLFW_KEY_M:
+			soundObject->play2D("audio/chop.wav", GL_FALSE);
+			water_on = !water_on;
 			break;
 		case GLFW_KEY_V:
 			move_camera = true;

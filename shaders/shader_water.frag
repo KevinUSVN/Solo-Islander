@@ -9,6 +9,8 @@ uniform sampler2D dudvMap;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform float moveFactor;
+
+uniform bool water_on;
  
 in vec3 world_pos;
 in vec3 world_normal;
@@ -19,7 +21,7 @@ in vec2 tex_coords;
 int levels = 5;
 float scaleFactor = 1.0 / levels;
 vec4 diffuseColor = vec4(0.30, 0.80, 0.10, 1);
-vec4 color = vec4(0.90, 0.0, 0.20, 1);
+vec4 color = vec4(0.0, 0.0, 1.0, 1);
 
 float material_shininess = 100;
 float material_kd = 0.5;
@@ -52,7 +54,15 @@ void main()
         color = vec4(texture(cubeMap, R + offset1).rgb, 1.0);
     }
 
-    FragColor = color;
+    if (water_on)
+    {
+        FragColor = color;
+    }
+    else
+    {
+        FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+    }
+    
 
     // To check normal colors
     // vec3 norm = (normalize(world_normal) + 1) / 2;

@@ -10,6 +10,7 @@ uniform sampler2D terrain_snow;
  
 uniform vec3 lightPos;
 uniform vec3 viewPos;
+uniform bool toon_on;
  
 in vec3 world_pos;
 in vec3 world_normal;
@@ -78,7 +79,11 @@ void main()
     //     color = 0.5 * color;
     // }
     
-    color = (color + diffuseColor + specular * specMask);
+    if (toon_on)
+    {
+        color = (color + diffuseColor + specular * specMask);
+    }
+    
 
     FragColor = color;
 
