@@ -1,2 +1,2 @@
-# CSE-167-Final-Project
-Final Project
+# Solo Islander
+Project made with OpenGL
